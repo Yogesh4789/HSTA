@@ -1,64 +1,123 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HSTA Home</title>
-<link rel="stylesheet" href="<%=request.getContextPath()%>/css/style.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
-<body>
-    <div class="container">
-        <div class="card">
-            <div class="topbar">
-                <div>
-                    <h1 class="title">Helpdesk Support Ticket Automation (HSTA)</h1>
-                    <p class="subtitle">NITTE MEENAKSHI INSTITUTE OF TECHNOLOGY - Dept. of Artificial Intelligence and Machine Learning</p>
+<body class="home-page">
+    <header class="home-header sticky-top">
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2 text-white fw-bold">
+                <span class="home-logo"><i class="fa-solid fa-life-ring"></i></span>
+                <span>Helpdesk Support Ticket Automation</span>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-light" href="${pageContext.request.contextPath}/login.jsp#registerSection">Register</a>
+                <a class="btn btn-primary" href="${pageContext.request.contextPath}/login.jsp">Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <section class="home-hero p-4 p-md-5 rounded-4 mb-4">
+                    <div class="row align-items-center g-4">
+                        <div class="col-lg-8">
+                            <p class="text-uppercase small fw-bold home-kicker mb-2">Advanced Java MVC 2 Project</p>
+                            <h1 class="display-5 fw-bold text-white mb-3">Modern Ticketing for Faster Support Resolution</h1>
+                            <p class="text-light-emphasis fs-6 fs-md-5 mb-4">
+                                HSTA centralizes ticket creation, assignment, SLA tracking and resolution workflows for users, agents and admins.
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a class="btn btn-primary px-4" href="${pageContext.request.contextPath}/login.jsp">Get Started</a>
+                                <a class="btn btn-outline-light px-4" href="${pageContext.request.contextPath}/kb?action=list">Knowledge Base</a>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="home-stat card shadow-sm p-3 mb-2">
+                                <h5 class="mb-1 fw-bold">24x7</h5>
+                                <p class="mb-0 text-muted">Ticket Visibility</p>
+                            </div>
+                            <div class="home-stat card shadow-sm p-3 mb-2">
+                                <h5 class="mb-1 fw-bold">3 Roles</h5>
+                                <p class="mb-0 text-muted">User, Agent, Admin</p>
+                            </div>
+                            <div class="home-stat card shadow-sm p-3">
+                                <h5 class="mb-1 fw-bold">SLA Ready</h5>
+                                <p class="mb-0 text-muted">Deadline-driven flow</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <section class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm p-3 h-100 home-card">
+                    <div class="home-card-icon mb-2"><i class="fa-solid fa-user"></i></div>
+                    <h5>User / Requester</h5>
+                    <p class="text-muted">Raise issues, track status, and reopen resolved tickets.</p>
+                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/login.jsp">Raise and Track</a>
                 </div>
-                <div>
-                    <a class="btn btn-primary" href="<%=request.getContextPath()%>/login.jsp">Login</a>
-                    <a class="btn btn-secondary" href="<%=request.getContextPath()%>/login.jsp#registerSection">Create Account</a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm p-3 h-100 home-card">
+                    <div class="home-card-icon mb-2"><i class="fa-solid fa-headset"></i></div>
+                    <h5>Support Agent</h5>
+                    <p class="text-muted">Handle assigned tickets and update progress with comments.</p>
+                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/login.jsp">Agent Workspace</a>
                 </div>
             </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm p-3 h-100 home-card">
+                    <div class="home-card-icon mb-2"><i class="fa-solid fa-user-gear"></i></div>
+                    <h5>Admin</h5>
+                    <p class="text-muted">Assign tickets, configure SLA policies, and view reports.</p>
+                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/login.jsp">Admin Console</a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm p-3 h-100 home-card">
+                    <div class="home-card-icon mb-2"><i class="fa-solid fa-book"></i></div>
+                    <h5>Knowledge Base</h5>
+                    <p class="text-muted">Search articles and solve common issues quickly.</p>
+                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/kb?action=list">Browse KB</a>
+                </div>
+            </div>
+        </section>
 
-            <p>
-                A centralized platform to raise, route, resolve, and monitor support tickets with SLA tracking,
-                role-based workflows, and knowledge-base driven self-service.
-            </p>
+        <section class="card shadow-sm p-4 mb-4">
+            <h3 class="fw-bold mb-3">Project Flow</h3>
+            <div class="row g-3 align-items-center text-center">
+                <div class="col-6 col-md-3"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-display me-1"></i> JSP (View)</div></div>
+                <div class="d-none d-md-block col-md-1"><i class="fa-solid fa-arrow-right text-muted"></i></div>
+                <div class="col-6 col-md-3"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-sliders me-1"></i> Servlet</div></div>
+                <div class="d-none d-md-block col-md-1"><i class="fa-solid fa-arrow-right text-muted"></i></div>
+                <div class="col-6 col-md-2"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-gears me-1"></i> Service</div></div>
+                <div class="col-6 col-md-2"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-database me-1"></i> DAO + MySQL</div></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="home-footer mt-4 py-3">
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
+            <span>Helpdesk Support Ticket Automation System</span>
+            <div class="d-flex gap-3">
+                <a href="${pageContext.request.contextPath}/index.jsp">Home</a>
+                <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
+                <a href="${pageContext.request.contextPath}/kb?action=list">Knowledge Base</a>
+            </div>
+            <span>Advanced Java Mini Project - NMIT AI and ML</span>
         </div>
+    </footer>
 
-        <div class="grid-2">
-            <div class="card">
-                <h3>User / Requester</h3>
-                <p class="small">Raise issues, track live status, reopen resolved tickets, and find quick self-help articles.</p>
-                <a class="btn btn-secondary" href="<%=request.getContextPath()%>/login.jsp">Raise & Track Tickets</a>
-            </div>
-
-            <div class="card">
-                <h3>Support Agent</h3>
-                <p class="small">Manage assigned tickets, update progress, add comments, and contribute to knowledge base.</p>
-                <a class="btn btn-secondary" href="<%=request.getContextPath()%>/login.jsp">Handle Assigned Tickets</a>
-            </div>
-
-            <div class="card">
-                <h3>Admin</h3>
-                <p class="small">Control SLA policies, assign/reassign tickets, and monitor compliance reports.</p>
-                <a class="btn btn-secondary" href="<%=request.getContextPath()%>/login.jsp">Open Admin Workflow</a>
-            </div>
-
-            <div class="card">
-                <h3>Key Features</h3>
-                <p class="small">Priority routing, SLA deadline management, role-based access, comments, and analytics.</p>
-                <a class="btn btn-secondary" href="<%=request.getContextPath()%>/kb?action=list">Explore Knowledge Base</a>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Project Flow</h3>
-            <p class="small">
-                JSP (View) → Servlet (Controller) → Service (Business Rules) → DAO (Data Access) → MySQL Database
-            </p>
-            <a class="btn btn-primary" href="<%=request.getContextPath()%>/login.jsp">Get Started</a>
-        </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
