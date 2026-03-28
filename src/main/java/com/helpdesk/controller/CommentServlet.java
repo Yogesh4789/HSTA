@@ -47,6 +47,10 @@ public class CommentServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
                 return;
             }
+            if (!canViewTicket(loggedUser, ticket)) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp?message=Unauthorized+access");
+                return;
+            }
 
             List<CommentBean> comments = commentDAO.getCommentsByTicket(ticketId);
             request.setAttribute("ticket", ticket);
@@ -137,5 +141,15 @@ public class CommentServlet extends HttpServlet {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private boolean canViewTicket(UserBean user, TicketBean ticket) {
+        if ("ADMIN".equals(user.getRole())) {
+            return true;
+        }
+        if ("AGENT".equals(user.getRole())) {
+            return ticket.getAssignedTo() == user.getUserId();
+        }
+        return ticket.getRaisedBy() == user.getUserId();
     }
 }

@@ -188,6 +188,29 @@ public class TicketDAO {
         return isAssigned;
     }
 
+    public boolean updateTicketPriority(int ticketId, String priority) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean isUpdated = false;
+
+        String sql = "UPDATE `TICKET` SET priority = ? WHERE ticket_id = ?";
+
+        try {
+            connection = DBConnection.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, priority);
+            preparedStatement.setInt(2, ticketId);
+            isUpdated = preparedStatement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeQuietly(preparedStatement);
+            closeQuietly(connection);
+        }
+
+        return isUpdated;
+    }
+
     public List<TicketBean> getAllTickets() {
         Connection connection = null;
         PreparedStatement preparedStatement = null;

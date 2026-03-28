@@ -84,6 +84,11 @@ public class AdminServlet extends HttpServlet {
         }
 
         try {
+            UserBean selectedAgent = userDAO.getUserById(agentId);
+            if (selectedAgent == null || !"AGENT".equals(selectedAgent.getRole())) {
+                response.sendRedirect(request.getContextPath() + "/admin?action=dashboard");
+                return;
+            }
             ticketDAO.assignTicket(ticketId, agentId);
             response.sendRedirect(request.getContextPath() + "/admin?action=dashboard");
         } catch (Exception e) {

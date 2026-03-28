@@ -47,6 +47,7 @@ public class PriorityRoutingServlet extends HttpServlet {
 
             String priority = routingService.assignPriority(category);
             int agentId = routingService.findAvailableAgentId();
+            ticketDAO.updateTicketPriority(ticketId, priority);
 
             if (agentId > 0) {
                 ticketDAO.assignTicket(ticketId, agentId);

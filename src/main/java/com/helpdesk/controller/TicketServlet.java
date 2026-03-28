@@ -249,6 +249,11 @@ public class TicketServlet extends HttpServlet {
                 return;
             }
 
+            if (!isValidStatusUpdate(newStatus)) {
+                response.sendRedirect(buildDetailRedirect(request, ticketId, "Invalid status value."));
+                return;
+            }
+
             if ("AGENT".equals(loggedUser.getRole()) && ticket.getAssignedTo() != loggedUser.getUserId()) {
                 response.sendRedirect(request.getContextPath() + "/login.jsp?message=Unauthorized+access");
                 return;
@@ -312,6 +317,11 @@ public class TicketServlet extends HttpServlet {
 
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
+    }
+
+    private boolean isValidStatusUpdate(String status) {
+        String normalized = status == null ? "" : status.trim().toUpperCase();
+        return "IN_PROGRESS".equals(normalized) || "RESOLVED".equals(normalized);
     }
 
     private String buildDetailRedirect(HttpServletRequest request, int ticketId, String message) {

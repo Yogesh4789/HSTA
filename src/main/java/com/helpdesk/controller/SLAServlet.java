@@ -71,6 +71,10 @@ public class SLAServlet extends HttpServlet {
 
         if (isBlank(priority) || responseHours <= 0 || resolutionHours <= 0) {
             request.setAttribute("errorMessage", "Invalid SLA input values.");
+            request.setAttribute("tickets", ticketDAO.getAllTickets());
+            request.setAttribute("agents", userDAO.getAllAgents());
+            request.setAttribute("slaPolicies", slaPolicyDAO.getAllPolicies());
+            request.setAttribute("activeSection", "sla");
             request.getRequestDispatcher("adminDashboard.jsp").forward(request, response);
             return;
         }

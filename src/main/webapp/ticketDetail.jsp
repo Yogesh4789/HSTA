@@ -79,7 +79,6 @@ if (isSlaBreached == null) {
                             <input type="hidden" name="ticketId" value="<%=ticket.getTicketId()%>">
                             <select name="status" required>
                                 <option value="">Change status</option>
-                                <option value="ASSIGNED">ASSIGNED</option>
                                 <option value="IN_PROGRESS">IN_PROGRESS</option>
                                 <option value="RESOLVED">RESOLVED</option>
                             </select>
