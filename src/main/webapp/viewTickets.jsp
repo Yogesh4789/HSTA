@@ -3,8 +3,12 @@
 <%@ page import="com.helpdesk.bean.UserBean" %>
 <%@ page import="com.helpdesk.bean.TicketBean" %>
 <%
-UserBean loggedUser = (UserBean) session.getAttribute("loggedUser");
+Object loggedUserObj = session.getAttribute("loggedUser");
+UserBean loggedUser = (loggedUserObj instanceof UserBean) ? (UserBean) loggedUserObj : null;
 if (loggedUser == null) {
+    if (loggedUserObj != null) {
+        session.removeAttribute("loggedUser");
+    }
     response.sendRedirect(request.getContextPath() + "/login.jsp?message=Please+login+first");
     return;
 }
@@ -76,7 +80,7 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
                                     <span class="badge badge-open"><%=t.getStatus()%></span>
                                 <% } %>
                             </td>
-                            <td><%=t.getAssignedToName() != null ? t.getAssignedToName() : (t.getAssignedTo() > 0 ? String.valueOf(t.getAssignedTo()) : "Unassigned")%></td>
+                            <td><%=t.getAssignedTo() > 0 ? ("Agent #" + t.getAssignedTo()) : "Unassigned"%></td>
                             <td><%=t.getSlaDeadline()%></td>
                             <td>
                                 <a class="btn btn-primary" href="<%=request.getContextPath()%>/ticket?action=detail&ticketId=<%=t.getTicketId()%>">Details</a>

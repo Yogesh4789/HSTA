@@ -8,7 +8,6 @@ public class DBConnection {
 
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/helpdesk_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata";
     private static final String DEFAULT_USER = "root";
-    private static final String DEFAULT_PASSWORD = "";
 
     private DBConnection() {
         // Utility class
@@ -17,7 +16,7 @@ public class DBConnection {
     public static Connection getConnection() throws SQLException {
         String url = getConfig("HELPDESK_DB_URL", "helpdesk.db.url", DEFAULT_URL);
         String username = getConfig("HELPDESK_DB_USER", "helpdesk.db.user", DEFAULT_USER);
-        String password = getConfig("HELPDESK_DB_PASSWORD", "helpdesk.db.password", DEFAULT_PASSWORD);
+        String password = getRequiredConfig("HELPDESK_DB_PASSWORD", "helpdesk.db.password");
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -37,5 +36,17 @@ public class DBConnection {
             value = defaultValue;
         }
         return value.trim();
+    }
+
+    private static String getRequiredConfig(String envKey, String systemPropertyKey) throws SQLException {
+        String value = System.getenv(envKey);
+        if (value == null) {
+            value = System.getProperty(systemPropertyKey);
+        }
+        if (value == null) {
+            throw new SQLException("Missing DB password config. Set env " + envKey
+                    + " or VM arg -D" + systemPropertyKey + "=<password>.");
+        }
+        return value;
     }
 }

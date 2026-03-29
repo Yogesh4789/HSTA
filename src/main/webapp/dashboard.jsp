@@ -1,11 +1,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.helpdesk.bean.UserBean" %>
 <%
-UserBean loggedUser = (UserBean) session.getAttribute("loggedUser");
+Object loggedUserObj = session.getAttribute("loggedUser");
+UserBean loggedUser = (loggedUserObj instanceof UserBean) ? (UserBean) loggedUserObj : null;
 String message = request.getParameter("message");
 if (loggedUser == null) {
+    if (loggedUserObj != null) {
+        session.removeAttribute("loggedUser");
+    }
     response.sendRedirect(request.getContextPath() + "/login.jsp?message=Please+login+first");
     return;
+}
+String displayName = loggedUser.getName();
+if (displayName != null && displayName.toLowerCase().endsWith(" user")) {
+    displayName = displayName.substring(0, displayName.length() - 5).trim();
 }
 %>
 <!DOCTYPE html>
@@ -20,7 +28,7 @@ if (loggedUser == null) {
         <div class="card">
             <div class="topbar">
                 <div>
-                    <h1 class="title">Welcome, <%=loggedUser.getName()%></h1>
+                    <h1 class="title">Welcome, <%=displayName%></h1>
                     <p class="subtitle">Role: <strong><%=loggedUser.getRole()%></strong></p>
                 </div>
                 <div>

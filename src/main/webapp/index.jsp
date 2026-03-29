@@ -29,7 +29,6 @@
                 <section class="home-hero p-4 p-md-5 rounded-4 mb-4">
                     <div class="row align-items-center g-4">
                         <div class="col-lg-8">
-                            <p class="text-uppercase small fw-bold home-kicker mb-2">Advanced Java MVC 2 Project</p>
                             <h1 class="display-5 fw-bold text-white mb-3">Modern Ticketing for Faster Support Resolution</h1>
                             <p class="text-light-emphasis fs-6 fs-md-5 mb-4">
                                 HSTA centralizes ticket creation, assignment, SLA tracking and resolution workflows for users, agents and admins.
@@ -93,17 +92,6 @@
             </div>
         </section>
 
-        <section class="card shadow-sm p-4 mb-4">
-            <h3 class="fw-bold mb-3">Project Flow</h3>
-            <div class="row g-3 align-items-center text-center">
-                <div class="col-6 col-md-3"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-display me-1"></i> JSP (View)</div></div>
-                <div class="d-none d-md-block col-md-1"><i class="fa-solid fa-arrow-right text-muted"></i></div>
-                <div class="col-6 col-md-3"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-sliders me-1"></i> Servlet</div></div>
-                <div class="d-none d-md-block col-md-1"><i class="fa-solid fa-arrow-right text-muted"></i></div>
-                <div class="col-6 col-md-2"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-gears me-1"></i> Service</div></div>
-                <div class="col-6 col-md-2"><div class="flow-step p-2 rounded-3"><i class="fa-solid fa-database me-1"></i> DAO + MySQL</div></div>
-            </div>
-        </section>
     </main>
 
     <footer class="home-footer mt-4 py-3">
@@ -114,7 +102,6 @@
                 <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
                 <a href="${pageContext.request.contextPath}/kb?action=list">Knowledge Base</a>
             </div>
-            <span>Advanced Java Mini Project - NMIT AI and ML</span>
         </div>
     </footer>
 

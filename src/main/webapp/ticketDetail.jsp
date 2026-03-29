@@ -4,8 +4,12 @@
 <%@ page import="com.helpdesk.bean.TicketBean" %>
 <%@ page import="com.helpdesk.bean.CommentBean" %>
 <%
-UserBean loggedUser = (UserBean) session.getAttribute("loggedUser");
+Object loggedUserObj = session.getAttribute("loggedUser");
+UserBean loggedUser = (loggedUserObj instanceof UserBean) ? (UserBean) loggedUserObj : null;
 if (loggedUser == null) {
+    if (loggedUserObj != null) {
+        session.removeAttribute("loggedUser");
+    }
     response.sendRedirect(request.getContextPath() + "/login.jsp?message=Please+login+first");
     return;
 }
@@ -66,7 +70,7 @@ if (isSlaBreached == null) {
                         <% } %>
                     </p>
                     <p><strong>Raised By:</strong> <%=ticket.getRaisedByName() != null ? ticket.getRaisedByName() : String.valueOf(ticket.getRaisedBy())%></p>
-                    <p><strong>Assigned To:</strong> <%=ticket.getAssignedToName() != null ? ticket.getAssignedToName() : (ticket.getAssignedTo() > 0 ? String.valueOf(ticket.getAssignedTo()) : "Unassigned")%></p>
+                    <p><strong>Assigned To:</strong> <%=ticket.getAssignedTo() > 0 ? ("Agent #" + ticket.getAssignedTo()) : "Unassigned"%></p>
                     <p><strong>Created At:</strong> <%=ticket.getCreatedAt()%></p>
                     <p><strong>SLA Deadline:</strong> <%=ticket.getSlaDeadline()%></p>
                     <% if (ticket.getResolvedAt() != null) { %>

@@ -128,6 +128,11 @@ public class TicketServlet extends HttpServlet {
         String title = request.getParameter("title");
         String description = request.getParameter("description");
         String category = request.getParameter("category");
+        String customCategory = request.getParameter("customCategory");
+
+        if ("Other".equalsIgnoreCase(category) && !isBlank(customCategory)) {
+            category = customCategory.trim();
+        }
 
         if (isBlank(title) || isBlank(description) || isBlank(category)) {
             request.setAttribute("errorMessage", "Title, description and category are required.");

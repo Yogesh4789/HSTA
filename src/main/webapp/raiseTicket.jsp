@@ -1,8 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.helpdesk.bean.UserBean" %>
 <%
-UserBean loggedUser = (UserBean) session.getAttribute("loggedUser");
+Object loggedUserObj = session.getAttribute("loggedUser");
+UserBean loggedUser = (loggedUserObj instanceof UserBean) ? (UserBean) loggedUserObj : null;
 if (loggedUser == null) {
+    if (loggedUserObj != null) {
+        session.removeAttribute("loggedUser");
+    }
     response.sendRedirect(request.getContextPath() + "/login.jsp?message=Please+login+first");
     return;
 }
@@ -47,7 +51,7 @@ String errorMessage = (String) request.getAttribute("errorMessage");
                 <textarea name="description" required></textarea>
 
                 <label>Category</label>
-                <select name="category" required>
+                <select id="categorySelect" name="category" required>
                     <option value="">Select category</option>
                     <option value="Authentication">Authentication</option>
                     <option value="Network">Network</option>
@@ -60,6 +64,12 @@ String errorMessage = (String) request.getAttribute("errorMessage");
                     <option value="Performance">Performance</option>
                     <option value="Other">Other</option>
                 </select>
+
+                <div id="customCategoryWrap" style="display:none;">
+                    <label>Enter Category</label>
+                    <input type="text" id="customCategoryInput" name="customCategory" maxlength="100"
+                           placeholder="Type your category">
+                </div>
 
                 <button class="btn btn-primary" type="submit">Submit Ticket</button>
             </form>
@@ -88,6 +98,28 @@ String errorMessage = (String) request.getAttribute("errorMessage");
                     revealTargets.forEach(function (el) {
                         el.classList.add("show");
                     });
+                }
+
+                var categorySelect = document.getElementById("categorySelect");
+                var customCategoryWrap = document.getElementById("customCategoryWrap");
+                var customCategoryInput = document.getElementById("customCategoryInput");
+
+                function toggleCustomCategory() {
+                    var isOther = categorySelect && categorySelect.value === "Other";
+                    if (customCategoryWrap) {
+                        customCategoryWrap.style.display = isOther ? "block" : "none";
+                    }
+                    if (customCategoryInput) {
+                        customCategoryInput.required = isOther;
+                        if (!isOther) {
+                            customCategoryInput.value = "";
+                        }
+                    }
+                }
+
+                if (categorySelect) {
+                    categorySelect.addEventListener("change", toggleCustomCategory);
+                    toggleCustomCategory();
                 }
             });
         })();

@@ -3,8 +3,12 @@
 <%@ page import="com.helpdesk.bean.UserBean" %>
 <%@ page import="com.helpdesk.bean.KnowledgeBaseBean" %>
 <%
-UserBean loggedUser = (UserBean) session.getAttribute("loggedUser");
+Object loggedUserObj = session.getAttribute("loggedUser");
+UserBean loggedUser = (loggedUserObj instanceof UserBean) ? (UserBean) loggedUserObj : null;
 if (loggedUser == null) {
+    if (loggedUserObj != null) {
+        session.removeAttribute("loggedUser");
+    }
     response.sendRedirect(request.getContextPath() + "/login.jsp?message=Please+login+first");
     return;
 }
@@ -94,7 +98,14 @@ String keywordEscaped = keyword.replace("&", "&amp;")
                             <td><%=kb.getArticleId()%></td>
                             <td><%=kb.getTitle()%></td>
                             <td><%=kb.getCategory()%></td>
-                            <td><%=kb.getCreatedBy()%></td>
+                            <%
+                                int createdById = kb.getCreatedBy();
+                                int agentNo = createdById - 1;
+                                if (agentNo <= 0) {
+                                    agentNo = createdById;
+                                }
+                            %>
+                            <td>Agent <%=agentNo%> (#<%=createdById%>)</td>
                             <td><%=kb.getContent()%></td>
                             <% if ("AGENT".equals(loggedUser.getRole()) || "ADMIN".equals(loggedUser.getRole())) { %>
                             <td>

@@ -8,12 +8,24 @@ String rememberedEmail = (String) request.getAttribute("rememberedEmail");
 if (rememberedEmail == null) {
     rememberedEmail = "";
 }
+if (rememberedEmail.trim().isEmpty()) {
+    javax.servlet.http.Cookie[] cookies = request.getCookies();
+    if (cookies != null) {
+        for (javax.servlet.http.Cookie cookie : cookies) {
+            if ("rememberedEmail".equals(cookie.getName()) && cookie.getValue() != null) {
+                rememberedEmail = cookie.getValue();
+                break;
+            }
+        }
+    }
+}
 String rememberedEmailEscaped = rememberedEmail.replace("&", "&amp;")
         .replace("<", "&lt;")
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&#39;");
-boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChecked"));
+boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChecked"))
+        || !rememberedEmail.trim().isEmpty();
 %>
 <!DOCTYPE html>
 <html>
@@ -38,7 +50,6 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
             <% } %>
 
             <div id="loginView" style="<%= defaultRegisterView ? "display:none;" : "" %>">
-                <p class="subtitle">Login as USER, AGENT, or ADMIN</p>
                 <form action="<%=request.getContextPath()%>/login" method="post">
                     <input type="hidden" name="action" value="login">
                     <label>Email</label>

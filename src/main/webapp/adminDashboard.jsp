@@ -5,8 +5,12 @@
 <%@ page import="com.helpdesk.bean.TicketBean" %>
 <%@ page import="com.helpdesk.bean.SLAPolicyBean" %>
 <%
-UserBean loggedUser = (UserBean) session.getAttribute("loggedUser");
+Object loggedUserObj = session.getAttribute("loggedUser");
+UserBean loggedUser = (loggedUserObj instanceof UserBean) ? (UserBean) loggedUserObj : null;
 if (loggedUser == null) {
+    if (loggedUserObj != null) {
+        session.removeAttribute("loggedUser");
+    }
     response.sendRedirect(request.getContextPath() + "/login.jsp?message=Please+login+first");
     return;
 }
@@ -27,9 +31,14 @@ String errorMessage = (String) request.getAttribute("errorMessage");
 if (activeSection == null || activeSection.trim().isEmpty()) {
     activeSection = request.getParameter("section");
 }
-boolean showSlaSection = slaPolicies != null;
-boolean showReportsSection = totalTickets != null || resolvedTickets != null || slaBreachedTickets != null || perAgentStats != null;
-boolean showUsersSection = allUsers != null;
+if (activeSection == null || activeSection.trim().isEmpty()) {
+    activeSection = "dashboard";
+}
+String section = activeSection.trim().toLowerCase();
+boolean showTicketSection = "dashboard".equals(section);
+boolean showUsersSection = "users".equals(section);
+boolean showSlaSection = "sla".equals(section);
+boolean showReportsSection = "reports".equals(section);
 %>
 <!DOCTYPE html>
 <html>
@@ -59,6 +68,7 @@ boolean showUsersSection = allUsers != null;
             <a class="btn btn-primary" href="<%=request.getContextPath()%>/admin?action=reports&section=reports">Reports</a>
         </div>
 
+        <% if (showTicketSection) { %>
         <div class="card" id="ticketAssignmentSection">
             <h3>Ticket Assignment</h3>
             <table>
@@ -80,7 +90,7 @@ boolean showUsersSection = allUsers != null;
                         for (TicketBean t : tickets) { %>
                         <tr>
                             <td><%=t.getTicketId()%></td>
-                            <td><a href="<%=request.getContextPath()%>/ticket?action=detail&ticketId=<%=t.getTicketId()%>"><%=t.getTitle()%></a></td>
+                            <td><a class="admin-ticket-title" href="<%=request.getContextPath()%>/ticket?action=detail&ticketId=<%=t.getTicketId()%>"><%=t.getTitle()%></a></td>
                             <td>
                                 <span class="badge <% if ("CRITICAL".equals(t.getPriority())) { %>badge-open<% } else if ("HIGH".equals(t.getPriority())) { %>badge-progress<% } else { %>badge-resolved<% } %>">
                                     <%=t.getPriority()%>
@@ -96,7 +106,15 @@ boolean showUsersSection = allUsers != null;
                                 <% } %>
                             </td>
                             <td><%=t.getRaisedByName() != null ? t.getRaisedByName() : String.valueOf(t.getRaisedBy())%></td>
-                            <td><%=t.getAssignedToName() != null ? t.getAssignedToName() : (t.getAssignedTo() > 0 ? String.valueOf(t.getAssignedTo()) : "Unassigned")%></td>
+                            <td>
+                                <% if (t.getAssignedTo() > 0) { %>
+                                    <%= (t.getAssignedToName() != null && !t.getAssignedToName().trim().isEmpty())
+                                            ? (t.getAssignedToName() + " (#" + t.getAssignedTo() + ")")
+                                            : ("Agent #" + t.getAssignedTo()) %>
+                                <% } else { %>
+                                    Unassigned
+                                <% } %>
+                            </td>
                             <td>
                                 <form action="<%=request.getContextPath()%>/admin" method="post">
                                     <input type="hidden" name="action" value="assign">
@@ -116,6 +134,7 @@ boolean showUsersSection = allUsers != null;
                 </tbody>
             </table>
         </div>
+        <% } %>
 
         <% if (showUsersSection) { %>
             <div class="card" id="usersSection">
@@ -137,9 +156,18 @@ boolean showUsersSection = allUsers != null;
                             <tr><td colspan="7">No users found.</td></tr>
                         <% } else {
                             for (UserBean u : allUsers) { %>
+                            <%
+                                String displayUserName = u.getName() == null ? "" : u.getName().trim();
+                                if ("USER".equals(u.getRole()) && displayUserName.toLowerCase().endsWith(" user")) {
+                                    displayUserName = displayUserName.substring(0, displayUserName.length() - 5).trim();
+                                }
+                                if ("AGENT".equals(u.getRole())) {
+                                    displayUserName = displayUserName + " (#" + u.getUserId() + ")";
+                                }
+                            %>
                             <tr>
                                 <td><%=u.getUserId()%></td>
-                                <td><%=u.getName()%></td>
+                                <td><%=displayUserName%></td>
                                 <td><%=u.getEmail()%></td>
                                 <td>
                                     <span class="badge <% if ("ADMIN".equals(u.getRole())) { %>badge-open<% } else if ("AGENT".equals(u.getRole())) { %>badge-progress<% } else { %>badge-resolved<% } %>">
@@ -265,10 +293,10 @@ boolean showUsersSection = allUsers != null;
             </div>
         <% } %>
     </div>
-    <% if ("sla".equalsIgnoreCase(activeSection) || "reports".equalsIgnoreCase(activeSection) || "users".equalsIgnoreCase(activeSection)) { %>
+    <% if ("sla".equalsIgnoreCase(section) || "reports".equalsIgnoreCase(section) || "users".equalsIgnoreCase(section)) { %>
     <script>
         window.addEventListener("load", function () {
-            var targetId = "<%= "reports".equalsIgnoreCase(activeSection) ? "reportsSection" : ("users".equalsIgnoreCase(activeSection) ? "usersSection" : "slaSection") %>";
+            var targetId = "<%= "reports".equalsIgnoreCase(section) ? "reportsSection" : ("users".equalsIgnoreCase(section) ? "usersSection" : "slaSection") %>";
             var section = document.getElementById(targetId);
             if (section) {
                 section.scrollIntoView({ behavior: "smooth", block: "start" });

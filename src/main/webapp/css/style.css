@@ -235,6 +235,16 @@ th {
     margin-right: 6px;
 }
 
+table .admin-ticket-title,
+table .admin-ticket-title:visited,
+table .admin-ticket-title:hover,
+table .admin-ticket-title:focus,
+table .admin-ticket-title:active {
+    color: #111827 !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+}
+
 .hero-text {
     animation: fadeUp 0.8s ease forwards;
 }
