@@ -308,6 +308,10 @@ body.home-page {
     font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.home-page .container-fluid {
+    width: 100%;
+}
+
 .home-header {
     background: rgba(15, 23, 42, 0.7);
     backdrop-filter: blur(10px);

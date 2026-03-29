@@ -11,7 +11,7 @@
 </head>
 <body class="home-page">
     <header class="home-header sticky-top">
-        <div class="container py-3 d-flex justify-content-between align-items-center">
+        <div class="container-fluid px-3 px-md-4 px-lg-5 py-3 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2 text-white fw-bold">
                 <span class="home-logo"><i class="fa-solid fa-life-ring"></i></span>
                 <span>Helpdesk Support Ticket Automation</span>
@@ -23,7 +23,7 @@
         </div>
     </header>
 
-    <main class="container mt-4">
+    <main class="container-fluid px-3 px-md-4 px-lg-5 mt-4">
         <div class="row">
             <div class="col-12">
                 <section class="home-hero p-4 p-md-5 rounded-4 mb-4">
@@ -95,7 +95,7 @@
     </main>
 
     <footer class="home-footer mt-4 py-3">
-        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
+        <div class="container-fluid px-3 px-md-4 px-lg-5 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
             <span>Helpdesk Support Ticket Automation System</span>
             <div class="d-flex gap-3">
                 <a href="${pageContext.request.contextPath}/index.jsp">Home</a>
