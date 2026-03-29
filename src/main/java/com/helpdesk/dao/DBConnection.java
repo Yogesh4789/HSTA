@@ -6,14 +6,18 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
+    private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/helpdesk_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata";
+    private static final String DEFAULT_USER = "root";
+    private static final String DEFAULT_PASSWORD = "";
+
     private DBConnection() {
         // Utility class
     }
 
     public static Connection getConnection() throws SQLException {
-        String url = getConfig("HELPDESK_DB_URL", "helpdesk.db.url");
-        String username = getConfig("HELPDESK_DB_USER", "helpdesk.db.user");
-        String password = getConfig("HELPDESK_DB_PASSWORD", "helpdesk.db.password");
+        String url = getConfig("HELPDESK_DB_URL", "helpdesk.db.url", DEFAULT_URL);
+        String username = getConfig("HELPDESK_DB_USER", "helpdesk.db.user", DEFAULT_USER);
+        String password = getConfig("HELPDESK_DB_PASSWORD", "helpdesk.db.password", DEFAULT_PASSWORD);
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -24,13 +28,13 @@ public class DBConnection {
         return DriverManager.getConnection(url, username, password);
     }
 
-    private static String getConfig(String envKey, String systemPropertyKey) throws SQLException {
+    private static String getConfig(String envKey, String systemPropertyKey, String defaultValue) {
         String value = System.getenv(envKey);
         if (value == null || value.trim().isEmpty()) {
             value = System.getProperty(systemPropertyKey);
         }
         if (value == null || value.trim().isEmpty()) {
-            throw new SQLException("Missing DB configuration: set " + envKey + " or -D" + systemPropertyKey);
+            value = defaultValue;
         }
         return value.trim();
     }

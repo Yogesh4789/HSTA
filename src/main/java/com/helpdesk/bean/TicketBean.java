@@ -14,6 +14,8 @@ public class TicketBean {
     private Date createdAt;
     private Date slaDeadline;
     private Date resolvedAt;
+    private String raisedByName;
+    private String assignedToName;
 
     public int getTicketId() {
         return ticketId;
@@ -101,5 +103,21 @@ public class TicketBean {
 
     public void setResolvedAt(Date resolvedAt) {
         this.resolvedAt = resolvedAt;
+    }
+
+    public String getRaisedByName() {
+        return raisedByName;
+    }
+
+    public void setRaisedByName(String raisedByName) {
+        this.raisedByName = raisedByName;
+    }
+
+    public String getAssignedToName() {
+        return assignedToName;
+    }
+
+    public void setAssignedToName(String assignedToName) {
+        this.assignedToName = assignedToName;
     }
 }

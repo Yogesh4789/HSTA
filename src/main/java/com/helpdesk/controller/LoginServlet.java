@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 
 import com.helpdesk.bean.UserBean;
-import com.helpdesk.dao.UserDAO;
+import com.helpdesk.service.UserService;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -17,7 +17,7 @@ import javax.servlet.http.HttpSession;
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final UserDAO userDAO = new UserDAO();
+    private final UserService userService = new UserService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -60,7 +60,7 @@ public class LoginServlet extends HttpServlet {
         }
 
         try {
-            UserBean user = userDAO.validateUser(email.trim(), password.trim());
+            UserBean user = userService.validateUser(email.trim(), password.trim());
             if (user == null) {
                 request.setAttribute("errorMessage", "Invalid credentials. Please try again.");
                 request.setAttribute("rememberedEmail", email);
@@ -120,16 +120,16 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        try {
-            UserBean user = new UserBean();
-            user.setName(name.trim());
-            user.setEmail(email.trim());
-            user.setPassword(password.trim());
-            user.setRole("USER");
+        if (!userService.isValidEmail(email.trim())) {
+            request.setAttribute("errorMessage", "Please enter a valid email address.");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
 
-            boolean registered = userDAO.registerUser(user);
+        try {
+            boolean registered = userService.registerUser(name, email, password, confirmPassword);
             if (registered) {
-                UserBean createdUser = userDAO.validateUser(user.getEmail(), user.getPassword());
+                UserBean createdUser = userService.validateUser(email.trim(), password.trim());
                 if (createdUser != null) {
                     HttpSession oldSession = request.getSession(false);
                     if (oldSession != null) {

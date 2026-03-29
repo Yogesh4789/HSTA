@@ -31,6 +31,12 @@ String errorMessage = (String) request.getAttribute("errorMessage");
                 <div class="alert alert-error"><%=errorMessage%></div>
             <% } %>
 
+            <div class="alert alert-info">
+                <strong>Tip:</strong> Before raising a ticket, check the
+                <a href="<%=request.getContextPath()%>/kb?action=list" style="color:#1849a9; text-decoration:underline;">Knowledge Base</a>
+                for existing solutions.
+            </div>
+
             <form action="<%=request.getContextPath()%>/ticket" method="post">
                 <input type="hidden" name="action" value="create">
 
@@ -48,6 +54,10 @@ String errorMessage = (String) request.getAttribute("errorMessage");
                     <option value="Software">Software</option>
                     <option value="Hardware">Hardware</option>
                     <option value="Database">Database</option>
+                    <option value="Security">Security</option>
+                    <option value="Outage">Outage</option>
+                    <option value="Payment">Payment</option>
+                    <option value="Performance">Performance</option>
                     <option value="Other">Other</option>
                 </select>
 
@@ -55,5 +65,32 @@ String errorMessage = (String) request.getAttribute("errorMessage");
             </form>
         </div>
     </div>
+    <script>
+        (function () {
+            document.addEventListener("DOMContentLoaded", function () {
+                var revealTargets = document.querySelectorAll(".card, table, form");
+                revealTargets.forEach(function (el) {
+                    el.classList.add("hidden");
+                });
+                if ("IntersectionObserver" in window) {
+                    var observer = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("show");
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { threshold: 0.12 });
+                    revealTargets.forEach(function (el) {
+                        observer.observe(el);
+                    });
+                } else {
+                    revealTargets.forEach(function (el) {
+                        el.classList.add("show");
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

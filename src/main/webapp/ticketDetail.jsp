@@ -51,9 +51,27 @@ if (isSlaBreached == null) {
                     <p><strong>Title:</strong> <%=ticket.getTitle()%></p>
                     <p><strong>Description:</strong> <%=ticket.getDescription()%></p>
                     <p><strong>Category:</strong> <%=ticket.getCategory()%></p>
-                    <p><strong>Priority:</strong> <%=ticket.getPriority()%></p>
-                    <p><strong>Status:</strong> <%=ticket.getStatus()%></p>
+                    <p><strong>Priority:</strong>
+                        <span class="badge <% if ("CRITICAL".equals(ticket.getPriority())) { %>badge-open<% } else if ("HIGH".equals(ticket.getPriority())) { %>badge-progress<% } else { %>badge-resolved<% } %>">
+                            <%=ticket.getPriority()%>
+                        </span>
+                    </p>
+                    <p><strong>Status:</strong>
+                        <% if ("IN_PROGRESS".equals(ticket.getStatus()) || "ASSIGNED".equals(ticket.getStatus())) { %>
+                            <span class="badge badge-progress"><%=ticket.getStatus()%></span>
+                        <% } else if ("RESOLVED".equals(ticket.getStatus()) || "CLOSED".equals(ticket.getStatus())) { %>
+                            <span class="badge badge-resolved"><%=ticket.getStatus()%></span>
+                        <% } else { %>
+                            <span class="badge badge-open"><%=ticket.getStatus()%></span>
+                        <% } %>
+                    </p>
+                    <p><strong>Raised By:</strong> <%=ticket.getRaisedByName() != null ? ticket.getRaisedByName() : String.valueOf(ticket.getRaisedBy())%></p>
+                    <p><strong>Assigned To:</strong> <%=ticket.getAssignedToName() != null ? ticket.getAssignedToName() : (ticket.getAssignedTo() > 0 ? String.valueOf(ticket.getAssignedTo()) : "Unassigned")%></p>
+                    <p><strong>Created At:</strong> <%=ticket.getCreatedAt()%></p>
                     <p><strong>SLA Deadline:</strong> <%=ticket.getSlaDeadline()%></p>
+                    <% if (ticket.getResolvedAt() != null) { %>
+                        <p><strong>Resolved At:</strong> <%=ticket.getResolvedAt()%></p>
+                    <% } %>
                 </div>
 
                 <div class="card actions-inline">
@@ -92,7 +110,7 @@ if (isSlaBreached == null) {
                     <table>
                         <thead>
                             <tr>
-                                <th>User ID</th>
+                                <th>By</th>
                                 <th>Comment</th>
                                 <th>Time</th>
                             </tr>
@@ -103,7 +121,7 @@ if (isSlaBreached == null) {
                             <% } else {
                                 for (CommentBean c : comments) { %>
                                 <tr>
-                                    <td><%=c.getCommentedBy()%></td>
+                                    <td><%=c.getCommentedByName() != null ? c.getCommentedByName() : String.valueOf(c.getCommentedBy())%></td>
                                     <td><%=c.getCommentText()%></td>
                                     <td><%=c.getCommentedAt()%></td>
                                 </tr>
@@ -126,5 +144,32 @@ if (isSlaBreached == null) {
             <% } %>
         </div>
     </div>
+    <script>
+        (function () {
+            document.addEventListener("DOMContentLoaded", function () {
+                var revealTargets = document.querySelectorAll(".card, table, form");
+                revealTargets.forEach(function (el) {
+                    el.classList.add("hidden");
+                });
+                if ("IntersectionObserver" in window) {
+                    var observer = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("show");
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { threshold: 0.12 });
+                    revealTargets.forEach(function (el) {
+                        observer.observe(el);
+                    });
+                } else {
+                    revealTargets.forEach(function (el) {
+                        el.classList.add("show");
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

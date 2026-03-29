@@ -121,5 +121,48 @@ String keywordEscaped = keyword.replace("&", "&amp;")
         });
     </script>
     <% } %>
+    <script>
+        (function () {
+            document.addEventListener("DOMContentLoaded", function () {
+                var navbar = document.querySelector(".navbar, .home-header");
+                if (navbar) {
+                    var updateNavbarState = function () {
+                        navbar.classList.toggle("scrolled", window.scrollY > 50);
+                    };
+                    updateNavbarState();
+                    window.addEventListener("scroll", updateNavbarState);
+                }
+
+                var heroHeading = document.querySelector(".home-hero h1, .card .title, h1");
+                if (heroHeading) {
+                    heroHeading.classList.add("hero-text");
+                }
+
+                var revealTargets = document.querySelectorAll(".card, table, form");
+                revealTargets.forEach(function (el) {
+                    el.classList.add("hidden");
+                });
+
+                if ("IntersectionObserver" in window) {
+                    var observer = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("show");
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { threshold: 0.12 });
+
+                    revealTargets.forEach(function (el) {
+                        observer.observe(el);
+                    });
+                } else {
+                    revealTargets.forEach(function (el) {
+                        el.classList.add("show");
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

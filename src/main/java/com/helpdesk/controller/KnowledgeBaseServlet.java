@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.helpdesk.bean.KnowledgeBaseBean;
 import com.helpdesk.bean.UserBean;
-import com.helpdesk.dao.KnowledgeBaseDAO;
+import com.helpdesk.service.KnowledgeBaseService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpSession;
 public class KnowledgeBaseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final KnowledgeBaseDAO knowledgeBaseDAO = new KnowledgeBaseDAO();
+    private final KnowledgeBaseService knowledgeBaseService = new KnowledgeBaseService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -58,7 +58,7 @@ public class KnowledgeBaseServlet extends HttpServlet {
     private void searchArticles(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
         try {
-            List<KnowledgeBaseBean> articles = knowledgeBaseDAO.searchArticles(keyword);
+            List<KnowledgeBaseBean> articles = knowledgeBaseService.searchArticles(keyword);
             request.setAttribute("articles", articles);
             if (articles == null || articles.isEmpty()) {
                 request.setAttribute("message", "No articles found. You can raise a support ticket.");
@@ -72,7 +72,7 @@ public class KnowledgeBaseServlet extends HttpServlet {
 
     private void listArticles(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            List<KnowledgeBaseBean> articles = knowledgeBaseDAO.getAllArticles();
+            List<KnowledgeBaseBean> articles = knowledgeBaseService.getAllArticles();
             request.setAttribute("articles", articles);
             request.getRequestDispatcher("knowledgeBase.jsp").forward(request, response);
         } catch (Exception e) {
@@ -94,18 +94,13 @@ public class KnowledgeBaseServlet extends HttpServlet {
 
         if (isBlank(title) || isBlank(content) || isBlank(category)) {
             request.setAttribute("errorMessage", "Title, content and category are required.");
+            request.setAttribute("articles", knowledgeBaseService.getAllArticles());
             request.getRequestDispatcher("knowledgeBase.jsp").forward(request, response);
             return;
         }
 
         try {
-            KnowledgeBaseBean article = new KnowledgeBaseBean();
-            article.setTitle(title.trim());
-            article.setContent(content.trim());
-            article.setCategory(category.trim());
-            article.setCreatedBy(loggedUser.getUserId());
-            knowledgeBaseDAO.addArticle(article);
-
+            knowledgeBaseService.addArticle(title, content, category, loggedUser.getUserId());
             response.sendRedirect(request.getContextPath() + "/kb?action=list");
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to add article.");
@@ -127,7 +122,7 @@ public class KnowledgeBaseServlet extends HttpServlet {
         }
 
         try {
-            knowledgeBaseDAO.deleteArticle(articleId);
+            knowledgeBaseService.deleteArticle(articleId);
             response.sendRedirect(request.getContextPath() + "/kb?action=list");
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to delete article.");

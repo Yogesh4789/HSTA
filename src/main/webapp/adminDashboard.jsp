@@ -17,16 +17,19 @@ if (!"ADMIN".equals(loggedUser.getRole())) {
 List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
 List<UserBean> agents = (List<UserBean>) request.getAttribute("agents");
 List<SLAPolicyBean> slaPolicies = (List<SLAPolicyBean>) request.getAttribute("slaPolicies");
+List<UserBean> allUsers = (List<UserBean>) request.getAttribute("allUsers");
 Integer totalTickets = (Integer) request.getAttribute("totalTickets");
 Integer resolvedTickets = (Integer) request.getAttribute("resolvedTickets");
 Integer slaBreachedTickets = (Integer) request.getAttribute("slaBreachedTickets");
 Map<String, Integer> perAgentStats = (Map<String, Integer>) request.getAttribute("perAgentStats");
 String activeSection = (String) request.getAttribute("activeSection");
+String errorMessage = (String) request.getAttribute("errorMessage");
 if (activeSection == null || activeSection.trim().isEmpty()) {
     activeSection = request.getParameter("section");
 }
 boolean showSlaSection = slaPolicies != null;
 boolean showReportsSection = totalTickets != null || resolvedTickets != null || slaBreachedTickets != null || perAgentStats != null;
+boolean showUsersSection = allUsers != null;
 %>
 <!DOCTYPE html>
 <html>
@@ -45,9 +48,15 @@ boolean showReportsSection = totalTickets != null || resolvedTickets != null || 
                     <a class="btn btn-secondary" href="<%=request.getContextPath()%>/login?action=logout">Logout</a>
                 </div>
             </div>
-            <a class="btn btn-primary" href="<%=request.getContextPath()%>/admin?action=dashboard">Refresh Dashboard</a>
-            <a class="btn btn-primary" href="<%=request.getContextPath()%>/sla?section=sla">Load SLA Policies</a>
-            <a class="btn btn-primary" href="<%=request.getContextPath()%>/admin?action=reports&section=reports">Generate Reports</a>
+
+            <% if (errorMessage != null) { %>
+                <div class="alert alert-error"><%=errorMessage%></div>
+            <% } %>
+
+            <a class="btn btn-primary" href="<%=request.getContextPath()%>/admin?action=dashboard">Ticket Assignment</a>
+            <a class="btn btn-primary" href="<%=request.getContextPath()%>/admin?action=users">Manage Users</a>
+            <a class="btn btn-primary" href="<%=request.getContextPath()%>/sla?section=sla">SLA Policies</a>
+            <a class="btn btn-primary" href="<%=request.getContextPath()%>/admin?action=reports&section=reports">Reports</a>
         </div>
 
         <div class="card" id="ticketAssignmentSection">
@@ -57,21 +66,37 @@ boolean showReportsSection = totalTickets != null || resolvedTickets != null || 
                     <tr>
                         <th>ID</th>
                         <th>Title</th>
+                        <th>Priority</th>
                         <th>Status</th>
-                        <th>Current Agent</th>
+                        <th>Raised By</th>
+                        <th>Assigned To</th>
                         <th>Assign/Reassign</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (tickets == null || tickets.isEmpty()) { %>
-                        <tr><td colspan="5">No tickets found.</td></tr>
+                        <tr><td colspan="7">No tickets found.</td></tr>
                     <% } else {
                         for (TicketBean t : tickets) { %>
                         <tr>
                             <td><%=t.getTicketId()%></td>
-                            <td><%=t.getTitle()%></td>
-                            <td><%=t.getStatus()%></td>
-                            <td><%=t.getAssignedTo()%></td>
+                            <td><a href="<%=request.getContextPath()%>/ticket?action=detail&ticketId=<%=t.getTicketId()%>"><%=t.getTitle()%></a></td>
+                            <td>
+                                <span class="badge <% if ("CRITICAL".equals(t.getPriority())) { %>badge-open<% } else if ("HIGH".equals(t.getPriority())) { %>badge-progress<% } else { %>badge-resolved<% } %>">
+                                    <%=t.getPriority()%>
+                                </span>
+                            </td>
+                            <td>
+                                <% if ("IN_PROGRESS".equals(t.getStatus()) || "ASSIGNED".equals(t.getStatus())) { %>
+                                    <span class="badge badge-progress"><%=t.getStatus()%></span>
+                                <% } else if ("RESOLVED".equals(t.getStatus()) || "CLOSED".equals(t.getStatus())) { %>
+                                    <span class="badge badge-resolved"><%=t.getStatus()%></span>
+                                <% } else { %>
+                                    <span class="badge badge-open"><%=t.getStatus()%></span>
+                                <% } %>
+                            </td>
+                            <td><%=t.getRaisedByName() != null ? t.getRaisedByName() : String.valueOf(t.getRaisedBy())%></td>
+                            <td><%=t.getAssignedToName() != null ? t.getAssignedToName() : (t.getAssignedTo() > 0 ? String.valueOf(t.getAssignedTo()) : "Unassigned")%></td>
                             <td>
                                 <form action="<%=request.getContextPath()%>/admin" method="post">
                                     <input type="hidden" name="action" value="assign">
@@ -91,6 +116,69 @@ boolean showReportsSection = totalTickets != null || resolvedTickets != null || 
                 </tbody>
             </table>
         </div>
+
+        <% if (showUsersSection) { %>
+            <div class="card" id="usersSection">
+                <h3>User Management</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Created</th>
+                            <th>Change Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (allUsers == null || allUsers.isEmpty()) { %>
+                            <tr><td colspan="7">No users found.</td></tr>
+                        <% } else {
+                            for (UserBean u : allUsers) { %>
+                            <tr>
+                                <td><%=u.getUserId()%></td>
+                                <td><%=u.getName()%></td>
+                                <td><%=u.getEmail()%></td>
+                                <td>
+                                    <span class="badge <% if ("ADMIN".equals(u.getRole())) { %>badge-open<% } else if ("AGENT".equals(u.getRole())) { %>badge-progress<% } else { %>badge-resolved<% } %>">
+                                        <%=u.getRole()%>
+                                    </span>
+                                </td>
+                                <td><%=u.getCreatedAt()%></td>
+                                <td>
+                                    <% if (u.getUserId() != loggedUser.getUserId()) { %>
+                                    <form action="<%=request.getContextPath()%>/admin" method="post" style="display:inline;">
+                                        <input type="hidden" name="action" value="updateRole">
+                                        <input type="hidden" name="userId" value="<%=u.getUserId()%>">
+                                        <select name="newRole" required>
+                                            <option value="">Select role</option>
+                                            <option value="USER" <%="USER".equals(u.getRole()) ? "selected" : ""%>>USER</option>
+                                            <option value="AGENT" <%="AGENT".equals(u.getRole()) ? "selected" : ""%>>AGENT</option>
+                                            <option value="ADMIN" <%="ADMIN".equals(u.getRole()) ? "selected" : ""%>>ADMIN</option>
+                                        </select>
+                                        <button class="btn btn-primary" type="submit">Update</button>
+                                    </form>
+                                    <% } else { %>
+                                        <span class="small">(Current Admin)</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <% if (u.getUserId() != loggedUser.getUserId()) { %>
+                                    <form action="<%=request.getContextPath()%>/admin" method="post" style="display:inline;">
+                                        <input type="hidden" name="action" value="deleteUser">
+                                        <input type="hidden" name="userId" value="<%=u.getUserId()%>">
+                                        <button class="btn btn-danger" type="submit" onclick="return confirm('Delete user <%=u.getName()%>?');">Delete</button>
+                                    </form>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% } } %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
 
         <% if (showSlaSection) { %>
             <div class="card" id="slaSection">
@@ -132,10 +220,34 @@ boolean showReportsSection = totalTickets != null || resolvedTickets != null || 
         <% if (showReportsSection) { %>
             <div class="card" id="reportsSection">
                 <h3>Reports</h3>
-                <p><strong>Total Tickets:</strong> <%= totalTickets == null ? 0 : totalTickets.intValue() %></p>
-                <p><strong>Resolved Tickets:</strong> <%= resolvedTickets == null ? 0 : resolvedTickets.intValue() %></p>
-                <p><strong>SLA Breaches:</strong> <%= slaBreachedTickets == null ? 0 : slaBreachedTickets.intValue() %></p>
-                <h4>Per-Agent Ticket Count</h4>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Total Tickets</h4>
+                        <p style="font-size:28px; font-weight:800; color:#0f766e;"><%= totalTickets == null ? 0 : totalTickets.intValue() %></p>
+                    </div>
+                    <div class="card">
+                        <h4>Resolved / Closed</h4>
+                        <p style="font-size:28px; font-weight:800; color:#027a48;"><%= resolvedTickets == null ? 0 : resolvedTickets.intValue() %></p>
+                    </div>
+                    <div class="card">
+                        <h4>SLA Breaches</h4>
+                        <p style="font-size:28px; font-weight:800; color:#b42318;"><%= slaBreachedTickets == null ? 0 : slaBreachedTickets.intValue() %></p>
+                    </div>
+                    <div class="card">
+                        <h4>Open Rate</h4>
+                        <p style="font-size:28px; font-weight:800; color:#b54708;">
+                            <%
+                            int total = totalTickets == null ? 0 : totalTickets.intValue();
+                            int resolved = resolvedTickets == null ? 0 : resolvedTickets.intValue();
+                            int open = total - resolved;
+                            String rate = total > 0 ? String.valueOf(Math.round((open * 100.0) / total)) + "%" : "0%";
+                            %>
+                            <%=rate%>
+                        </p>
+                    </div>
+                </div>
+
+                <h4 style="margin-top:16px;">Per-Agent Ticket Count</h4>
                 <table>
                     <thead><tr><th>Agent</th><th>Assigned Tickets</th></tr></thead>
                     <tbody>
@@ -153,10 +265,10 @@ boolean showReportsSection = totalTickets != null || resolvedTickets != null || 
             </div>
         <% } %>
     </div>
-    <% if ("sla".equalsIgnoreCase(activeSection) || "reports".equalsIgnoreCase(activeSection)) { %>
+    <% if ("sla".equalsIgnoreCase(activeSection) || "reports".equalsIgnoreCase(activeSection) || "users".equalsIgnoreCase(activeSection)) { %>
     <script>
         window.addEventListener("load", function () {
-            var targetId = "<%= "reports".equalsIgnoreCase(activeSection) ? "reportsSection" : "slaSection" %>";
+            var targetId = "<%= "reports".equalsIgnoreCase(activeSection) ? "reportsSection" : ("users".equalsIgnoreCase(activeSection) ? "usersSection" : "slaSection") %>";
             var section = document.getElementById(targetId);
             if (section) {
                 section.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -164,5 +276,32 @@ boolean showReportsSection = totalTickets != null || resolvedTickets != null || 
         });
     </script>
     <% } %>
+    <script>
+        (function () {
+            document.addEventListener("DOMContentLoaded", function () {
+                var revealTargets = document.querySelectorAll(".card, table, form");
+                revealTargets.forEach(function (el) {
+                    el.classList.add("hidden");
+                });
+                if ("IntersectionObserver" in window) {
+                    var observer = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("show");
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { threshold: 0.12 });
+                    revealTargets.forEach(function (el) {
+                        observer.observe(el);
+                    });
+                } else {
+                    revealTargets.forEach(function (el) {
+                        el.classList.add("show");
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

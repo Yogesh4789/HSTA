@@ -50,8 +50,11 @@ public class CommentDAO {
         ResultSet resultSet = null;
         List<CommentBean> comments = new ArrayList<CommentBean>();
 
-        String sql = "SELECT comment_id, ticket_id, commented_by, comment_text, commented_at "
-                + "FROM `COMMENT` WHERE ticket_id = ? ORDER BY commented_at ASC";
+        String sql = "SELECT c.comment_id, c.ticket_id, c.commented_by, c.comment_text, c.commented_at, "
+                + "u.name AS commented_by_name "
+                + "FROM `COMMENT` c "
+                + "JOIN `USER` u ON c.commented_by = u.user_id "
+                + "WHERE c.ticket_id = ? ORDER BY c.commented_at ASC";
 
         try {
             connection = DBConnection.getConnection();
@@ -60,7 +63,9 @@ public class CommentDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                comments.add(mapComment(resultSet));
+                CommentBean comment = mapComment(resultSet);
+                comment.setCommentedByName(resultSet.getString("commented_by_name"));
+                comments.add(comment);
             }
         } catch (SQLException e) {
             e.printStackTrace();

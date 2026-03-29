@@ -56,8 +56,13 @@ public class TicketDAO {
         ResultSet resultSet = null;
         TicketBean ticket = null;
 
-        String sql = "SELECT ticket_id, title, description, category, priority, status, raised_by, assigned_to, "
-                + "created_at, sla_deadline, resolved_at FROM `TICKET` WHERE ticket_id = ?";
+        String sql = "SELECT t.ticket_id, t.title, t.description, t.category, t.priority, t.status, "
+                + "t.raised_by, t.assigned_to, t.created_at, t.sla_deadline, t.resolved_at, "
+                + "u1.name AS raised_by_name, u2.name AS assigned_to_name "
+                + "FROM `TICKET` t "
+                + "JOIN `USER` u1 ON t.raised_by = u1.user_id "
+                + "LEFT JOIN `USER` u2 ON t.assigned_to = u2.user_id "
+                + "WHERE t.ticket_id = ?";
 
         try {
             connection = DBConnection.getConnection();
@@ -66,7 +71,7 @@ public class TicketDAO {
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                ticket = mapTicket(resultSet);
+                ticket = mapTicketWithNames(resultSet);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -85,8 +90,13 @@ public class TicketDAO {
         ResultSet resultSet = null;
         List<TicketBean> tickets = new ArrayList<TicketBean>();
 
-        String sql = "SELECT ticket_id, title, description, category, priority, status, raised_by, assigned_to, "
-                + "created_at, sla_deadline, resolved_at FROM `TICKET` WHERE raised_by = ? ORDER BY created_at DESC";
+        String sql = "SELECT t.ticket_id, t.title, t.description, t.category, t.priority, t.status, "
+                + "t.raised_by, t.assigned_to, t.created_at, t.sla_deadline, t.resolved_at, "
+                + "u1.name AS raised_by_name, u2.name AS assigned_to_name "
+                + "FROM `TICKET` t "
+                + "JOIN `USER` u1 ON t.raised_by = u1.user_id "
+                + "LEFT JOIN `USER` u2 ON t.assigned_to = u2.user_id "
+                + "WHERE t.raised_by = ? ORDER BY t.created_at DESC";
 
         try {
             connection = DBConnection.getConnection();
@@ -95,7 +105,7 @@ public class TicketDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                tickets.add(mapTicket(resultSet));
+                tickets.add(mapTicketWithNames(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -114,8 +124,13 @@ public class TicketDAO {
         ResultSet resultSet = null;
         List<TicketBean> tickets = new ArrayList<TicketBean>();
 
-        String sql = "SELECT ticket_id, title, description, category, priority, status, raised_by, assigned_to, "
-                + "created_at, sla_deadline, resolved_at FROM `TICKET` WHERE assigned_to = ? ORDER BY created_at DESC";
+        String sql = "SELECT t.ticket_id, t.title, t.description, t.category, t.priority, t.status, "
+                + "t.raised_by, t.assigned_to, t.created_at, t.sla_deadline, t.resolved_at, "
+                + "u1.name AS raised_by_name, u2.name AS assigned_to_name "
+                + "FROM `TICKET` t "
+                + "JOIN `USER` u1 ON t.raised_by = u1.user_id "
+                + "LEFT JOIN `USER` u2 ON t.assigned_to = u2.user_id "
+                + "WHERE t.assigned_to = ? ORDER BY t.created_at DESC";
 
         try {
             connection = DBConnection.getConnection();
@@ -124,7 +139,7 @@ public class TicketDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                tickets.add(mapTicket(resultSet));
+                tickets.add(mapTicketWithNames(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -217,8 +232,13 @@ public class TicketDAO {
         ResultSet resultSet = null;
         List<TicketBean> tickets = new ArrayList<TicketBean>();
 
-        String sql = "SELECT ticket_id, title, description, category, priority, status, raised_by, assigned_to, "
-                + "created_at, sla_deadline, resolved_at FROM `TICKET` ORDER BY created_at DESC";
+        String sql = "SELECT t.ticket_id, t.title, t.description, t.category, t.priority, t.status, "
+                + "t.raised_by, t.assigned_to, t.created_at, t.sla_deadline, t.resolved_at, "
+                + "u1.name AS raised_by_name, u2.name AS assigned_to_name "
+                + "FROM `TICKET` t "
+                + "JOIN `USER` u1 ON t.raised_by = u1.user_id "
+                + "LEFT JOIN `USER` u2 ON t.assigned_to = u2.user_id "
+                + "ORDER BY t.created_at DESC";
 
         try {
             connection = DBConnection.getConnection();
@@ -226,7 +246,7 @@ public class TicketDAO {
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                tickets.add(mapTicket(resultSet));
+                tickets.add(mapTicketWithNames(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -237,6 +257,48 @@ public class TicketDAO {
         }
 
         return tickets;
+    }
+
+    /**
+     * Optimized duplicate check: queries DB directly for same user + title within N minutes.
+     */
+    public boolean hasRecentDuplicate(int userId, String title, int minutesAgo) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        boolean hasDuplicate = false;
+
+        String sql = "SELECT COUNT(*) AS cnt FROM `TICKET` "
+                + "WHERE raised_by = ? AND LOWER(TRIM(title)) = LOWER(TRIM(?)) "
+                + "AND created_at >= DATE_SUB(NOW(), INTERVAL ? MINUTE)";
+
+        try {
+            connection = DBConnection.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, userId);
+            preparedStatement.setString(2, title);
+            preparedStatement.setInt(3, minutesAgo);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                hasDuplicate = resultSet.getInt("cnt") > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeQuietly(resultSet);
+            closeQuietly(preparedStatement);
+            closeQuietly(connection);
+        }
+
+        return hasDuplicate;
+    }
+
+    private TicketBean mapTicketWithNames(ResultSet resultSet) throws SQLException {
+        TicketBean ticket = mapTicket(resultSet);
+        ticket.setRaisedByName(resultSet.getString("raised_by_name"));
+        ticket.setAssignedToName(resultSet.getString("assigned_to_name"));
+        return ticket;
     }
 
     private TicketBean mapTicket(ResultSet resultSet) throws SQLException {

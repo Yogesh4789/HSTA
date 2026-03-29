@@ -2,14 +2,12 @@ package com.helpdesk.controller;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.List;
 
 import com.helpdesk.bean.CommentBean;
 import com.helpdesk.bean.TicketBean;
 import com.helpdesk.bean.UserBean;
-import com.helpdesk.dao.CommentDAO;
-import com.helpdesk.dao.TicketDAO;
+import com.helpdesk.service.CommentService;
 import com.helpdesk.service.TicketService;
 
 import javax.servlet.ServletException;
@@ -21,9 +19,8 @@ import javax.servlet.http.HttpSession;
 public class TicketServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final TicketDAO ticketDAO = new TicketDAO();
     private final TicketService ticketService = new TicketService();
-    private final CommentDAO commentDAO = new CommentDAO();
+    private final CommentService commentService = new CommentService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -75,11 +72,11 @@ public class TicketServlet extends HttpServlet {
         try {
             List<TicketBean> tickets;
             if ("ADMIN".equals(loggedUser.getRole())) {
-                tickets = ticketDAO.getAllTickets();
+                tickets = ticketService.getAllTickets();
             } else if ("AGENT".equals(loggedUser.getRole())) {
-                tickets = ticketDAO.getTicketsByAgent(loggedUser.getUserId());
+                tickets = ticketService.getTicketsByAgent(loggedUser.getUserId());
             } else {
-                tickets = ticketDAO.getTicketsByUser(loggedUser.getUserId());
+                tickets = ticketService.getTicketsByUser(loggedUser.getUserId());
             }
 
             request.setAttribute("tickets", tickets);
@@ -99,7 +96,7 @@ public class TicketServlet extends HttpServlet {
         }
 
         try {
-            TicketBean ticket = ticketDAO.getTicketById(ticketId);
+            TicketBean ticket = ticketService.getTicketById(ticketId);
             if (ticket == null) {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
                 return;
@@ -110,10 +107,10 @@ public class TicketServlet extends HttpServlet {
                 return;
             }
 
-            List<CommentBean> comments = commentDAO.getCommentsByTicket(ticketId);
+            List<CommentBean> comments = commentService.getCommentsByTicket(ticketId);
             request.setAttribute("ticket", ticket);
             request.setAttribute("comments", comments);
-            request.setAttribute("isSlaBreached", isSlaBreached(ticket));
+            request.setAttribute("isSlaBreached", Boolean.valueOf(ticketService.isSlaBreached(ticket)));
             request.getRequestDispatcher("ticketDetail.jsp").forward(request, response);
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to load ticket details.");
@@ -174,7 +171,7 @@ public class TicketServlet extends HttpServlet {
         }
 
         try {
-            TicketBean ticket = ticketDAO.getTicketById(ticketId);
+            TicketBean ticket = ticketService.getTicketById(ticketId);
             if (ticket == null) {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
                 return;
@@ -185,7 +182,7 @@ public class TicketServlet extends HttpServlet {
                 return;
             }
 
-            ticketDAO.updateTicketStatus(ticketId, "CLOSED");
+            ticketService.updateTicketStatus(ticketId, "CLOSED");
             response.sendRedirect(request.getContextPath() + "/ticket?action=detail&ticketId=" + ticketId);
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to close ticket.");
@@ -202,7 +199,7 @@ public class TicketServlet extends HttpServlet {
         }
 
         try {
-            TicketBean ticket = ticketDAO.getTicketById(ticketId);
+            TicketBean ticket = ticketService.getTicketById(ticketId);
             if (ticket == null) {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
                 return;
@@ -219,7 +216,7 @@ public class TicketServlet extends HttpServlet {
                 return;
             }
 
-            ticketDAO.updateTicketStatus(ticketId, "OPEN");
+            ticketService.updateTicketStatus(ticketId, "OPEN");
             response.sendRedirect(request.getContextPath() + "/ticket?action=detail&ticketId=" + ticketId);
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to reopen ticket.");
@@ -243,7 +240,7 @@ public class TicketServlet extends HttpServlet {
         }
 
         try {
-            TicketBean ticket = ticketDAO.getTicketById(ticketId);
+            TicketBean ticket = ticketService.getTicketById(ticketId);
             if (ticket == null) {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
                 return;
@@ -267,7 +264,7 @@ public class TicketServlet extends HttpServlet {
                 return;
             }
 
-            ticketDAO.updateTicketStatus(ticketId, newStatus.trim());
+            ticketService.updateTicketStatus(ticketId, newStatus.trim());
             response.sendRedirect(request.getContextPath() + "/ticket?action=detail&ticketId=" + ticketId);
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to update ticket status.");
@@ -295,16 +292,6 @@ public class TicketServlet extends HttpServlet {
             return ticket.getAssignedTo() == user.getUserId();
         }
         return ticket.getRaisedBy() == user.getUserId();
-    }
-
-    private boolean isSlaBreached(TicketBean ticket) {
-        if (ticket.getSlaDeadline() == null) {
-            return false;
-        }
-        if ("RESOLVED".equals(ticket.getStatus()) || "CLOSED".equals(ticket.getStatus())) {
-            return false;
-        }
-        return ticket.getSlaDeadline().before(new Date());
     }
 
     private int parseInt(String value) {

@@ -8,6 +8,7 @@ public class CommentBean {
     private int commentedBy;
     private String commentText;
     private Date commentedAt;
+    private String commentedByName;
 
     public int getCommentId() {
         return commentId;
@@ -47,5 +48,13 @@ public class CommentBean {
 
     public void setCommentedAt(Date commentedAt) {
         this.commentedAt = commentedAt;
+    }
+
+    public String getCommentedByName() {
+        return commentedByName;
+    }
+
+    public void setCommentedByName(String commentedByName) {
+        this.commentedByName = commentedByName;
     }
 }

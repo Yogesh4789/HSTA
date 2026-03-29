@@ -21,8 +21,21 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
     <div class="container">
         <div class="card">
             <div class="topbar">
-                <h2 class="title">Ticket List</h2>
-                <a class="btn btn-secondary" href="<%=request.getContextPath()%>/dashboard.jsp">Back</a>
+                <h2 class="title">
+                    <% if ("AGENT".equals(loggedUser.getRole())) { %>
+                        My Assigned Tickets
+                    <% } else if ("ADMIN".equals(loggedUser.getRole())) { %>
+                        All Tickets
+                    <% } else { %>
+                        My Tickets
+                    <% } %>
+                </h2>
+                <div>
+                    <% if ("USER".equals(loggedUser.getRole()) || "ADMIN".equals(loggedUser.getRole())) { %>
+                        <a class="btn btn-primary" href="<%=request.getContextPath()%>/raiseTicket.jsp">New Ticket</a>
+                    <% } %>
+                    <a class="btn btn-secondary" href="<%=request.getContextPath()%>/dashboard.jsp">Back</a>
+                </div>
             </div>
 
             <table>
@@ -33,6 +46,7 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
                         <th>Category</th>
                         <th>Priority</th>
                         <th>Status</th>
+                        <th>Assigned To</th>
                         <th>SLA Deadline</th>
                         <th>Action</th>
                     </tr>
@@ -40,7 +54,7 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
                 <tbody>
                     <% if (tickets == null || tickets.isEmpty()) { %>
                         <tr>
-                            <td colspan="7">No tickets found.</td>
+                            <td colspan="8">No tickets found.</td>
                         </tr>
                     <% } else {
                         for (TicketBean t : tickets) { %>
@@ -48,7 +62,11 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
                             <td><%=t.getTicketId()%></td>
                             <td><%=t.getTitle()%></td>
                             <td><%=t.getCategory()%></td>
-                            <td><%=t.getPriority()%></td>
+                            <td>
+                                <span class="badge <% if ("CRITICAL".equals(t.getPriority())) { %>badge-open<% } else if ("HIGH".equals(t.getPriority())) { %>badge-progress<% } else { %>badge-resolved<% } %>">
+                                    <%=t.getPriority()%>
+                                </span>
+                            </td>
                             <td>
                                 <% if ("IN_PROGRESS".equals(t.getStatus()) || "ASSIGNED".equals(t.getStatus())) { %>
                                     <span class="badge badge-progress"><%=t.getStatus()%></span>
@@ -58,6 +76,7 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
                                     <span class="badge badge-open"><%=t.getStatus()%></span>
                                 <% } %>
                             </td>
+                            <td><%=t.getAssignedToName() != null ? t.getAssignedToName() : (t.getAssignedTo() > 0 ? String.valueOf(t.getAssignedTo()) : "Unassigned")%></td>
                             <td><%=t.getSlaDeadline()%></td>
                             <td>
                                 <a class="btn btn-primary" href="<%=request.getContextPath()%>/ticket?action=detail&ticketId=<%=t.getTicketId()%>">Details</a>
@@ -68,5 +87,32 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
             </table>
         </div>
     </div>
+    <script>
+        (function () {
+            document.addEventListener("DOMContentLoaded", function () {
+                var revealTargets = document.querySelectorAll(".card, table, form");
+                revealTargets.forEach(function (el) {
+                    el.classList.add("hidden");
+                });
+                if ("IntersectionObserver" in window) {
+                    var observer = new IntersectionObserver(function (entries) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("show");
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, { threshold: 0.12 });
+                    revealTargets.forEach(function (el) {
+                        observer.observe(el);
+                    });
+                } else {
+                    revealTargets.forEach(function (el) {
+                        el.classList.add("show");
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

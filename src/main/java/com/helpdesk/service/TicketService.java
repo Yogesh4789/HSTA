@@ -24,8 +24,8 @@ public class TicketService {
             return false;
         }
 
-        // Block duplicate ticket: same user + same title within last 10 minutes
-        if (isDuplicateRecentTicket(ticket.getRaisedBy(), ticket.getTitle())) {
+        // Block duplicate ticket: same user + same title within last 10 minutes (optimized DB query)
+        if (ticketDAO.hasRecentDuplicate(ticket.getRaisedBy(), ticket.getTitle(), 10)) {
             return false;
         }
 
@@ -47,29 +47,51 @@ public class TicketService {
         return ticketDAO.createTicket(ticket);
     }
 
-    private boolean isDuplicateRecentTicket(int userId, String title) {
-        List<TicketBean> userTickets = ticketDAO.getTicketsByUser(userId);
-        if (userTickets == null || userTickets.isEmpty()) {
+    public TicketBean getTicketById(int ticketId) {
+        if (ticketId <= 0) {
+            return null;
+        }
+        return ticketDAO.getTicketById(ticketId);
+    }
+
+    public List<TicketBean> getTicketsByUser(int userId) {
+        return ticketDAO.getTicketsByUser(userId);
+    }
+
+    public List<TicketBean> getTicketsByAgent(int agentId) {
+        return ticketDAO.getTicketsByAgent(agentId);
+    }
+
+    public List<TicketBean> getAllTickets() {
+        return ticketDAO.getAllTickets();
+    }
+
+    public boolean updateTicketStatus(int ticketId, String status) {
+        if (ticketId <= 0 || isBlank(status)) {
             return false;
         }
+        return ticketDAO.updateTicketStatus(ticketId, status.trim());
+    }
 
-        String normalizedTitle = title.trim().toLowerCase();
-        long now = System.currentTimeMillis();
-        long tenMinutesInMillis = 10L * 60L * 1000L;
-
-        for (TicketBean existingTicket : userTickets) {
-            if (existingTicket.getTitle() == null || existingTicket.getCreatedAt() == null) {
-                continue;
-            }
-
-            String existingTitle = existingTicket.getTitle().trim().toLowerCase();
-            long ageMillis = now - existingTicket.getCreatedAt().getTime();
-
-            if (normalizedTitle.equals(existingTitle) && ageMillis >= 0 && ageMillis <= tenMinutesInMillis) {
-                return true;
-            }
+    public boolean assignTicket(int ticketId, int agentId) {
+        if (ticketId <= 0 || agentId <= 0) {
+            return false;
         }
-        return false;
+        return ticketDAO.assignTicket(ticketId, agentId);
+    }
+
+    public boolean updateTicketPriority(int ticketId, String priority) {
+        if (ticketId <= 0 || isBlank(priority)) {
+            return false;
+        }
+        return ticketDAO.updateTicketPriority(ticketId, priority.trim());
+    }
+
+    public boolean isSlaBreached(TicketBean ticket) {
+        if (ticket == null) {
+            return false;
+        }
+        return slaService.isSlaBreached(ticket.getSlaDeadline(), ticket.getStatus());
     }
 
     private boolean isBlank(String value) {

@@ -1,13 +1,11 @@
 package com.helpdesk.controller;
 
 import java.io.IOException;
-import java.util.List;
 
-import com.helpdesk.bean.CommentBean;
 import com.helpdesk.bean.TicketBean;
 import com.helpdesk.bean.UserBean;
-import com.helpdesk.dao.CommentDAO;
-import com.helpdesk.dao.TicketDAO;
+import com.helpdesk.service.CommentService;
+import com.helpdesk.service.TicketService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,8 +16,8 @@ import javax.servlet.http.HttpSession;
 public class CommentServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final CommentDAO commentDAO = new CommentDAO();
-    private final TicketDAO ticketDAO = new TicketDAO();
+    private final CommentService commentService = new CommentService();
+    private final TicketService ticketService = new TicketService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -42,7 +40,7 @@ public class CommentServlet extends HttpServlet {
         }
 
         try {
-            TicketBean ticket = ticketDAO.getTicketById(ticketId);
+            TicketBean ticket = ticketService.getTicketById(ticketId);
             if (ticket == null) {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
                 return;
@@ -52,9 +50,8 @@ public class CommentServlet extends HttpServlet {
                 return;
             }
 
-            List<CommentBean> comments = commentDAO.getCommentsByTicket(ticketId);
             request.setAttribute("ticket", ticket);
-            request.setAttribute("comments", comments);
+            request.setAttribute("comments", commentService.getCommentsByTicket(ticketId));
             request.getRequestDispatcher("ticketDetail.jsp").forward(request, response);
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to load comments.");
@@ -84,16 +81,9 @@ public class CommentServlet extends HttpServlet {
         }
 
         try {
-            TicketBean ticket = ticketDAO.getTicketById(ticketId);
+            TicketBean ticket = ticketService.getTicketById(ticketId);
             if (ticket == null) {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
-                return;
-            }
-
-            // Business rule: comments cannot be added to CLOSED tickets.
-            if ("CLOSED".equals(ticket.getStatus())) {
-                response.sendRedirect(request.getContextPath()
-                        + "/ticket?action=detail&ticketId=" + ticketId + "&message=Cannot+comment+on+closed+ticket");
                 return;
             }
 
@@ -106,11 +96,12 @@ public class CommentServlet extends HttpServlet {
                 return;
             }
 
-            CommentBean comment = new CommentBean();
-            comment.setTicketId(ticketId);
-            comment.setCommentedBy(loggedUser.getUserId());
-            comment.setCommentText(commentText.trim());
-            commentDAO.addComment(comment);
+            String error = commentService.addComment(ticketId, loggedUser.getUserId(), commentText.trim());
+            if (error != null) {
+                response.sendRedirect(request.getContextPath()
+                        + "/ticket?action=detail&ticketId=" + ticketId + "&message=" + error.replace(" ", "+"));
+                return;
+            }
 
             response.sendRedirect(request.getContextPath() + "/ticket?action=detail&ticketId=" + ticketId);
         } catch (Exception e) {

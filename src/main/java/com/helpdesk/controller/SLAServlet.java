@@ -5,9 +5,8 @@ import java.util.List;
 
 import com.helpdesk.bean.SLAPolicyBean;
 import com.helpdesk.bean.UserBean;
-import com.helpdesk.dao.SLAPolicyDAO;
-import com.helpdesk.dao.TicketDAO;
-import com.helpdesk.dao.UserDAO;
+import com.helpdesk.service.AdminService;
+import com.helpdesk.service.SLAService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -18,9 +17,8 @@ import javax.servlet.http.HttpSession;
 public class SLAServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    private final SLAPolicyDAO slaPolicyDAO = new SLAPolicyDAO();
-    private final TicketDAO ticketDAO = new TicketDAO();
-    private final UserDAO userDAO = new UserDAO();
+    private final SLAService slaService = new SLAService();
+    private final AdminService adminService = new AdminService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -35,10 +33,10 @@ public class SLAServlet extends HttpServlet {
         }
 
         try {
-            List<SLAPolicyBean> policies = slaPolicyDAO.getAllPolicies();
+            List<SLAPolicyBean> policies = slaService.getAllPolicies();
             request.setAttribute("slaPolicies", policies);
-            request.setAttribute("tickets", ticketDAO.getAllTickets());
-            request.setAttribute("agents", userDAO.getAllAgents());
+            request.setAttribute("tickets", adminService.getAllTickets());
+            request.setAttribute("agents", adminService.getAllAgents());
             request.setAttribute("activeSection", "sla");
             request.getRequestDispatcher("adminDashboard.jsp").forward(request, response);
         } catch (Exception e) {
@@ -71,21 +69,16 @@ public class SLAServlet extends HttpServlet {
 
         if (isBlank(priority) || responseHours <= 0 || resolutionHours <= 0) {
             request.setAttribute("errorMessage", "Invalid SLA input values.");
-            request.setAttribute("tickets", ticketDAO.getAllTickets());
-            request.setAttribute("agents", userDAO.getAllAgents());
-            request.setAttribute("slaPolicies", slaPolicyDAO.getAllPolicies());
+            request.setAttribute("tickets", adminService.getAllTickets());
+            request.setAttribute("agents", adminService.getAllAgents());
+            request.setAttribute("slaPolicies", slaService.getAllPolicies());
             request.setAttribute("activeSection", "sla");
             request.getRequestDispatcher("adminDashboard.jsp").forward(request, response);
             return;
         }
 
         try {
-            SLAPolicyBean policy = new SLAPolicyBean();
-            policy.setPriority(priority.trim());
-            policy.setResponseTimeHours(responseHours);
-            policy.setResolutionTimeHours(resolutionHours);
-            slaPolicyDAO.updateSLAPolicy(policy);
-
+            slaService.updatePolicy(priority.trim(), responseHours, resolutionHours);
             response.sendRedirect(request.getContextPath() + "/sla?section=sla");
         } catch (Exception e) {
             request.setAttribute("errorMessage", "Unable to update SLA policy.");

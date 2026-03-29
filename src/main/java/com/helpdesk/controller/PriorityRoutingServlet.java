@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import com.helpdesk.bean.TicketBean;
 import com.helpdesk.bean.UserBean;
-import com.helpdesk.dao.TicketDAO;
 import com.helpdesk.service.PriorityRoutingService;
+import com.helpdesk.service.TicketService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,7 +17,7 @@ public class PriorityRoutingServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final PriorityRoutingService routingService = new PriorityRoutingService();
-    private final TicketDAO ticketDAO = new TicketDAO();
+    private final TicketService ticketService = new TicketService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -39,7 +39,7 @@ public class PriorityRoutingServlet extends HttpServlet {
         }
 
         try {
-            TicketBean ticket = ticketDAO.getTicketById(ticketId);
+            TicketBean ticket = ticketService.getTicketById(ticketId);
             if (ticket == null) {
                 response.sendRedirect(request.getContextPath() + "/ticket?action=view");
                 return;
@@ -47,10 +47,10 @@ public class PriorityRoutingServlet extends HttpServlet {
 
             String priority = routingService.assignPriority(category);
             int agentId = routingService.findAvailableAgentId();
-            ticketDAO.updateTicketPriority(ticketId, priority);
+            ticketService.updateTicketPriority(ticketId, priority);
 
             if (agentId > 0) {
-                ticketDAO.assignTicket(ticketId, agentId);
+                ticketService.assignTicket(ticketId, agentId);
                 request.getSession().setAttribute("routeMessage",
                         "Ticket routed with priority " + priority + " and assigned to agent #" + agentId);
             } else {
