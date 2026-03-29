@@ -395,8 +395,15 @@ body.home-page {
 
 .home-hero {
     background: linear-gradient(140deg, rgba(15, 22, 31, 0.96), rgba(24, 33, 45, 0.92));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.35);
     box-shadow: 0 14px 30px rgba(2, 6, 23, 0.42);
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.home-hero:hover {
+    transform: translateY(-3px);
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 18px 34px rgba(2, 6, 23, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.18) inset;
 }
 
 .home-kicker {
