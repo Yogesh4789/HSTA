@@ -1,10 +1,8 @@
 package com.helpdesk.controller;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
-import com.helpdesk.bean.TicketBean;
 import com.helpdesk.bean.UserBean;
 import com.helpdesk.service.AdminService;
 
@@ -169,7 +167,6 @@ public class AdminServlet extends HttpServlet {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void loadReports(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
