@@ -58,7 +58,10 @@ public class UserDAO {
 
             isRegistered = preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (isDuplicateEmailViolation(e)) {
+                return false;
+            }
+            throw new RuntimeException("Database error while registering user.", e);
         } finally {
             closeQuietly(preparedStatement);
             closeQuietly(connection);
@@ -245,5 +248,9 @@ public class UserDAO {
                 e.printStackTrace();
             }
         }
+    }
+
+    private boolean isDuplicateEmailViolation(SQLException e) {
+        return e != null && ("23000".equals(e.getSQLState()) || e.getErrorCode() == 1062);
     }
 }
