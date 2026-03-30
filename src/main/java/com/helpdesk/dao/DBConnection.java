@@ -6,16 +6,13 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/helpdesk_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata";
-    private static final String DEFAULT_USER = "root";
-
     private DBConnection() {
         // Utility class
     }
 
     public static Connection getConnection() throws SQLException {
-        String url = getConfig("HELPDESK_DB_URL", "helpdesk.db.url", DEFAULT_URL);
-        String username = getConfig("HELPDESK_DB_USER", "helpdesk.db.user", DEFAULT_USER);
+        String url = getRequiredConfig("HELPDESK_DB_URL", "helpdesk.db.url");
+        String username = getRequiredConfig("HELPDESK_DB_USER", "helpdesk.db.user");
         String password = getRequiredConfig("HELPDESK_DB_PASSWORD", "helpdesk.db.password");
         url = ensureMySqlCompatibilityParams(url);
 
@@ -44,26 +41,15 @@ public class DBConnection {
         return normalized + joiner + "allowPublicKeyRetrieval=true";
     }
 
-    private static String getConfig(String envKey, String systemPropertyKey, String defaultValue) {
-        String value = System.getenv(envKey);
-        if (value == null || value.trim().isEmpty()) {
-            value = System.getProperty(systemPropertyKey);
-        }
-        if (value == null || value.trim().isEmpty()) {
-            value = defaultValue;
-        }
-        return value.trim();
-    }
-
     private static String getRequiredConfig(String envKey, String systemPropertyKey) throws SQLException {
         String value = System.getenv(envKey);
-        if (value == null) {
+        if (value == null || value.trim().isEmpty()) {
             value = System.getProperty(systemPropertyKey);
         }
-        if (value == null) {
-            throw new SQLException("Missing DB password config. Set env " + envKey
-                    + " or VM arg -D" + systemPropertyKey + "=<password>.");
+        if (value == null || value.trim().isEmpty()) {
+            throw new SQLException("Missing DB config. Set env " + envKey
+                    + " or VM arg -D" + systemPropertyKey + "=<value>.");
         }
-        return value;
+        return value.trim();
     }
 }
