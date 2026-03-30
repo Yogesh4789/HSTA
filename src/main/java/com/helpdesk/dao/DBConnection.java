@@ -17,6 +17,7 @@ public class DBConnection {
         String url = getConfig("HELPDESK_DB_URL", "helpdesk.db.url", DEFAULT_URL);
         String username = getConfig("HELPDESK_DB_USER", "helpdesk.db.user", DEFAULT_USER);
         String password = getRequiredConfig("HELPDESK_DB_PASSWORD", "helpdesk.db.password");
+        url = ensureMySqlCompatibilityParams(url);
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -25,6 +26,22 @@ public class DBConnection {
         }
 
         return DriverManager.getConnection(url, username, password);
+    }
+
+    private static String ensureMySqlCompatibilityParams(String url) {
+        if (url == null) {
+            return null;
+        }
+        String normalized = url.trim();
+        String lower = normalized.toLowerCase();
+        if (!lower.startsWith("jdbc:mysql:")) {
+            return normalized;
+        }
+        if (lower.contains("allowpublickeyretrieval=")) {
+            return normalized;
+        }
+        char joiner = normalized.contains("?") ? '&' : '?';
+        return normalized + joiner + "allowPublicKeyRetrieval=true";
     }
 
     private static String getConfig(String envKey, String systemPropertyKey, String defaultValue) {
