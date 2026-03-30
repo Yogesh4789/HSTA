@@ -70,7 +70,32 @@ if (isSlaBreached == null) {
                         <% } %>
                     </p>
                     <p><strong>Raised By:</strong> <%=ticket.getRaisedByName() != null ? ticket.getRaisedByName() : String.valueOf(ticket.getRaisedBy())%></p>
-                    <p><strong>Assigned To:</strong> <%=ticket.getAssignedTo() > 0 ? ("Agent #" + ticket.getAssignedTo()) : "Unassigned"%></p>
+                    <p><strong>Assigned To:</strong>
+                        <%
+                            if (ticket.getAssignedTo() > 0) {
+                                String assignedDisplayName = ticket.getAssignedToName();
+                                if (assignedDisplayName != null) {
+                                    assignedDisplayName = assignedDisplayName.trim();
+                                    if (assignedDisplayName.toLowerCase().startsWith("agent ")) {
+                                        assignedDisplayName = assignedDisplayName.substring(6).trim();
+                                    }
+                                }
+                                if (assignedDisplayName != null && !assignedDisplayName.isEmpty()) {
+                        %>
+                            Agent <%=assignedDisplayName%>
+                        <%
+                                } else {
+                        %>
+                            Agent #<%=ticket.getAssignedTo()%>
+                        <%
+                                }
+                            } else {
+                        %>
+                            Unassigned
+                        <%
+                            }
+                        %>
+                    </p>
                     <p><strong>Created At:</strong> <%=ticket.getCreatedAt()%></p>
                     <p><strong>SLA Deadline:</strong> <%=ticket.getSlaDeadline()%></p>
                     <% if (ticket.getResolvedAt() != null) { %>

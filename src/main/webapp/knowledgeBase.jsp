@@ -99,13 +99,18 @@ String keywordEscaped = keyword.replace("&", "&amp;")
                             <td><%=kb.getTitle()%></td>
                             <td><%=kb.getCategory()%></td>
                             <%
-                                int createdById = kb.getCreatedBy();
-                                int agentNo = createdById - 1;
-                                if (agentNo <= 0) {
-                                    agentNo = createdById;
+                                String kbAgentName = kb.getCreatedByName();
+                                if (kbAgentName != null) {
+                                    kbAgentName = kbAgentName.trim();
+                                    if (kbAgentName.toLowerCase().startsWith("agent ")) {
+                                        kbAgentName = kbAgentName.substring(6).trim();
+                                    }
                                 }
+                                String displayName = (kbAgentName != null && !kbAgentName.isEmpty())
+                                        ? ("Agent " + kbAgentName)
+                                        : ("Agent #" + kb.getCreatedBy());
                             %>
-                            <td>Agent <%=agentNo%> (#<%=createdById%>)</td>
+                            <td><%=displayName%></td>
                             <td><%=kb.getContent()%></td>
                             <% if ("AGENT".equals(loggedUser.getRole()) || "ADMIN".equals(loggedUser.getRole())) { %>
                             <td>

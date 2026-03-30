@@ -42,9 +42,10 @@ public class KnowledgeBaseDAO {
         ResultSet resultSet = null;
         List<KnowledgeBaseBean> articles = new ArrayList<KnowledgeBaseBean>();
 
-        String sql = "SELECT article_id, title, content, category, created_by, created_at "
-                + "FROM `KNOWLEDGE_BASE` WHERE title LIKE ? OR content LIKE ? OR category LIKE ? "
-                + "ORDER BY created_at DESC";
+        String sql = "SELECT k.article_id, k.title, k.content, k.category, k.created_by, k.created_at, u.name as created_by_name "
+                + "FROM `KNOWLEDGE_BASE` k LEFT JOIN `USER` u ON k.created_by = u.user_id "
+                + "WHERE k.title LIKE ? OR k.content LIKE ? OR k.category LIKE ? "
+                + "ORDER BY k.created_at DESC";
 
         try {
             connection = DBConnection.getConnection();
@@ -75,8 +76,9 @@ public class KnowledgeBaseDAO {
         ResultSet resultSet = null;
         List<KnowledgeBaseBean> articles = new ArrayList<KnowledgeBaseBean>();
 
-        String sql = "SELECT article_id, title, content, category, created_by, created_at "
-                + "FROM `KNOWLEDGE_BASE` ORDER BY created_at DESC";
+        String sql = "SELECT k.article_id, k.title, k.content, k.category, k.created_by, k.created_at, u.name as created_by_name "
+                + "FROM `KNOWLEDGE_BASE` k LEFT JOIN `USER` u ON k.created_by = u.user_id "
+                + "ORDER BY k.created_at DESC";
 
         try {
             connection = DBConnection.getConnection();
@@ -127,6 +129,11 @@ public class KnowledgeBaseDAO {
         article.setCategory(resultSet.getString("category"));
         article.setCreatedBy(resultSet.getInt("created_by"));
         article.setCreatedAt(resultSet.getTimestamp("created_at"));
+        try {
+            article.setCreatedByName(resultSet.getString("created_by_name"));
+        } catch (SQLException e) {
+            // Field might not exist in old queries
+        }
         return article;
     }
 

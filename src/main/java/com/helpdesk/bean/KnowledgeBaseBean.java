@@ -8,6 +8,7 @@ public class KnowledgeBaseBean {
     private String content;
     private String category;
     private int createdBy;
+    private String createdByName;
     private Date createdAt;
 
     public int getArticleId() {
@@ -48,6 +49,14 @@ public class KnowledgeBaseBean {
 
     public void setCreatedBy(int createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
     }
 
     public Date getCreatedAt() {

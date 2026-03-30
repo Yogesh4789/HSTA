@@ -108,8 +108,17 @@ boolean showReportsSection = "reports".equals(section);
                             <td><%=t.getRaisedByName() != null ? t.getRaisedByName() : String.valueOf(t.getRaisedBy())%></td>
                             <td>
                                 <% if (t.getAssignedTo() > 0) { %>
-                                    <%= (t.getAssignedToName() != null && !t.getAssignedToName().trim().isEmpty())
-                                            ? (t.getAssignedToName() + " (#" + t.getAssignedTo() + ")")
+                                    <%
+                                        String assignedDisplayName = t.getAssignedToName();
+                                        if (assignedDisplayName != null) {
+                                            assignedDisplayName = assignedDisplayName.trim();
+                                            if (assignedDisplayName.toLowerCase().startsWith("agent ")) {
+                                                assignedDisplayName = assignedDisplayName.substring(6).trim();
+                                            }
+                                        }
+                                    %>
+                                    <%= (assignedDisplayName != null && !assignedDisplayName.isEmpty())
+                                            ? ("Agent " + assignedDisplayName)
                                             : ("Agent #" + t.getAssignedTo()) %>
                                 <% } else { %>
                                     Unassigned
@@ -123,7 +132,13 @@ boolean showReportsSection = "reports".equals(section);
                                         <option value="">Select agent</option>
                                         <% if (agents != null) {
                                             for (UserBean a : agents) { %>
-                                            <option value="<%=a.getUserId()%>"><%=a.getName()%> (#<%=a.getUserId()%>)</option>
+                                            <%
+                                                String optionAgentName = a.getName() == null ? "" : a.getName().trim();
+                                                if (optionAgentName.toLowerCase().startsWith("agent ")) {
+                                                    optionAgentName = optionAgentName.substring(6).trim();
+                                                }
+                                            %>
+                                            <option value="<%=a.getUserId()%>">Agent <%=optionAgentName%></option>
                                         <% } } %>
                                     </select>
                                     <button class="btn btn-primary" type="submit">Assign</button>
@@ -162,7 +177,10 @@ boolean showReportsSection = "reports".equals(section);
                                     displayUserName = displayUserName.substring(0, displayUserName.length() - 5).trim();
                                 }
                                 if ("AGENT".equals(u.getRole())) {
-                                    displayUserName = displayUserName + " (#" + u.getUserId() + ")";
+                                    if (displayUserName.toLowerCase().startsWith("agent ")) {
+                                        displayUserName = displayUserName.substring(6).trim();
+                                    }
+                                    displayUserName = "Agent " + displayUserName;
                                 }
                             %>
                             <tr>
@@ -283,8 +301,17 @@ boolean showReportsSection = "reports".equals(section);
                             <tr><td colspan="2">No report data available.</td></tr>
                         <% } else {
                             for (Map.Entry<String, Integer> e : perAgentStats.entrySet()) { %>
+                            <%
+                                String reportAgentName = e.getKey() == null ? "" : e.getKey().trim();
+                                if (reportAgentName.toLowerCase().startsWith("agent ")) {
+                                    reportAgentName = reportAgentName.substring(6).trim();
+                                }
+                                if (reportAgentName.isEmpty()) {
+                                    reportAgentName = "Unknown";
+                                }
+                            %>
                             <tr>
-                                <td><%=e.getKey()%></td>
+                                <td>Agent <%=reportAgentName%></td>
                                 <td><%=e.getValue()%></td>
                             </tr>
                         <% } } %>

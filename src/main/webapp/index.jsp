@@ -7,23 +7,23 @@
 <title>HSTA Home</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/style.css">
 </head>
 <body class="home-page">
-    <header class="home-header sticky-top">
+    <div class="home-header sticky-top">
         <div class="container-fluid px-3 px-md-4 px-lg-5 py-3 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2 text-white fw-bold">
                 <span class="home-logo"><i class="fa-solid fa-life-ring"></i></span>
                 <span>Helpdesk Support Ticket Automation</span>
             </div>
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-light" href="${pageContext.request.contextPath}/login.jsp#registerSection">Register</a>
-                <a class="btn btn-primary" href="${pageContext.request.contextPath}/login.jsp">Login</a>
+                <a class="btn btn-outline-light" href="<%=request.getContextPath()%>/login.jsp#registerSection">Register</a>
+                <a class="btn btn-primary" href="<%=request.getContextPath()%>/login.jsp">Login</a>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="container-fluid px-3 px-md-4 px-lg-5 mt-4">
+    <div class="container-fluid px-3 px-md-4 px-lg-5 mt-4">
         <div class="row">
             <div class="col-12">
                 <section class="home-hero p-4 p-md-5 rounded-4 mb-4">
@@ -34,8 +34,8 @@
                                 HSTA centralizes ticket creation, assignment, SLA tracking and resolution workflows for users, agents and admins.
                             </p>
                             <div class="d-flex flex-wrap gap-2">
-                                <a class="btn btn-primary px-4" href="${pageContext.request.contextPath}/login.jsp">Get Started</a>
-                                <a class="btn btn-outline-light px-4" href="${pageContext.request.contextPath}/kb?action=list">Knowledge Base</a>
+                                <a class="btn btn-primary px-4" href="<%=request.getContextPath()%>/login.jsp">Get Started</a>
+                                <a class="btn btn-outline-light px-4" href="<%=request.getContextPath()%>/kb?action=list">Knowledge Base</a>
                             </div>
                         </div>
                         <div class="col-lg-4">
@@ -63,7 +63,7 @@
                     <div class="home-card-icon mb-2"><i class="fa-solid fa-user"></i></div>
                     <h5>User / Requester</h5>
                     <p class="text-muted">Raise issues, track status, and reopen resolved tickets.</p>
-                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/login.jsp">Raise and Track</a>
+                    <a class="btn btn-outline-primary mt-auto" href="<%=request.getContextPath()%>/login.jsp">Raise and Track</a>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
@@ -71,7 +71,7 @@
                     <div class="home-card-icon mb-2"><i class="fa-solid fa-headset"></i></div>
                     <h5>Support Agent</h5>
                     <p class="text-muted">Handle assigned tickets and update progress with comments.</p>
-                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/login.jsp">Agent Workspace</a>
+                    <a class="btn btn-outline-primary mt-auto" href="<%=request.getContextPath()%>/login.jsp">Agent Workspace</a>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
@@ -79,7 +79,7 @@
                     <div class="home-card-icon mb-2"><i class="fa-solid fa-user-gear"></i></div>
                     <h5>Admin</h5>
                     <p class="text-muted">Assign tickets, configure SLA policies, and view reports.</p>
-                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/login.jsp">Admin Console</a>
+                    <a class="btn btn-outline-primary mt-auto" href="<%=request.getContextPath()%>/login.jsp">Admin Console</a>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
@@ -87,23 +87,23 @@
                     <div class="home-card-icon mb-2"><i class="fa-solid fa-book"></i></div>
                     <h5>Knowledge Base</h5>
                     <p class="text-muted">Search articles and solve common issues quickly.</p>
-                    <a class="btn btn-outline-primary mt-auto" href="${pageContext.request.contextPath}/kb?action=list">Browse KB</a>
+                    <a class="btn btn-outline-primary mt-auto" href="<%=request.getContextPath()%>/kb?action=list">Browse KB</a>
                 </div>
             </div>
         </section>
 
-    </main>
+    </div>
 
-    <footer class="home-footer mt-4 py-3">
+    <div class="home-footer mt-4 py-3">
         <div class="container-fluid px-3 px-md-4 px-lg-5 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
             <span>Helpdesk Support Ticket Automation System</span>
             <div class="d-flex gap-3">
-                <a href="${pageContext.request.contextPath}/index.jsp">Home</a>
-                <a href="${pageContext.request.contextPath}/login.jsp">Login</a>
-                <a href="${pageContext.request.contextPath}/kb?action=list">Knowledge Base</a>
+                <a href="<%=request.getContextPath()%>/index.jsp">Home</a>
+                <a href="<%=request.getContextPath()%>/login.jsp">Login</a>
+                <a href="<%=request.getContextPath()%>/kb?action=list">Knowledge Base</a>
             </div>
         </div>
-    </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>

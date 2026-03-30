@@ -80,7 +80,32 @@ List<TicketBean> tickets = (List<TicketBean>) request.getAttribute("tickets");
                                     <span class="badge badge-open"><%=t.getStatus()%></span>
                                 <% } %>
                             </td>
-                            <td><%=t.getAssignedTo() > 0 ? ("Agent #" + t.getAssignedTo()) : "Unassigned"%></td>
+                            <td>
+                                <%
+                                    if (t.getAssignedTo() > 0) {
+                                        String assignedDisplayName = t.getAssignedToName();
+                                        if (assignedDisplayName != null) {
+                                            assignedDisplayName = assignedDisplayName.trim();
+                                            if (assignedDisplayName.toLowerCase().startsWith("agent ")) {
+                                                assignedDisplayName = assignedDisplayName.substring(6).trim();
+                                            }
+                                        }
+                                        if (assignedDisplayName != null && !assignedDisplayName.isEmpty()) {
+                                %>
+                                    Agent <%=assignedDisplayName%>
+                                <%
+                                        } else {
+                                %>
+                                    Agent #<%=t.getAssignedTo()%>
+                                <%
+                                        }
+                                    } else {
+                                %>
+                                    Unassigned
+                                <%
+                                    }
+                                %>
+                            </td>
                             <td><%=t.getSlaDeadline()%></td>
                             <td>
                                 <a class="btn btn-primary" href="<%=request.getContextPath()%>/ticket?action=detail&ticketId=<%=t.getTicketId()%>">Details</a>
