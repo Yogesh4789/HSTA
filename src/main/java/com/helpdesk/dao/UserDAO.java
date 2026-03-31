@@ -18,7 +18,7 @@ public class UserDAO {
         UserBean user = null;
 
         String sql = "SELECT user_id, name, email, password, role, created_at "
-                + "FROM `USER` WHERE email = ? AND password = ?";
+                + "FROM `USER` WHERE email = ? AND password = ? AND password != '*'";
 
         try {
             connection = DBConnection.getConnection();
@@ -106,7 +106,7 @@ public class UserDAO {
         UserBean user = null;
 
         String sql = "SELECT user_id, name, email, password, role, created_at "
-                + "FROM `USER` WHERE email = ?";
+                + "FROM `USER` WHERE email = ? AND password != '*'";
 
         try {
             connection = DBConnection.getConnection();
@@ -135,7 +135,7 @@ public class UserDAO {
         List<UserBean> agents = new ArrayList<UserBean>();
 
         String sql = "SELECT user_id, name, email, password, role, created_at "
-                + "FROM `USER` WHERE role = 'AGENT' ORDER BY name";
+                + "FROM `USER` WHERE role = 'AGENT' AND password != '*' ORDER BY name";
 
         try {
             connection = DBConnection.getConnection();
@@ -163,7 +163,7 @@ public class UserDAO {
         List<UserBean> users = new ArrayList<UserBean>();
 
         String sql = "SELECT user_id, name, email, password, role, created_at "
-                + "FROM `USER` ORDER BY user_id";
+                + "FROM `USER` WHERE password != '*' ORDER BY user_id";
 
         try {
             connection = DBConnection.getConnection();
@@ -212,7 +212,7 @@ public class UserDAO {
         PreparedStatement preparedStatement = null;
         boolean isDeleted = false;
 
-        String sql = "DELETE FROM `USER` WHERE user_id = ?";
+        String sql = "UPDATE `USER` SET password = '*', email = CONCAT('deleted_', user_id, '_', SUBSTRING(email, 1, 70)) WHERE user_id = ?";
 
         try {
             connection = DBConnection.getConnection();
