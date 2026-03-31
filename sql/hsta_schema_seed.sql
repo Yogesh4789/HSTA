@@ -149,5 +149,13 @@ INSERT INTO `KNOWLEDGE_BASE` (title, content, category, created_by) VALUES
     3
 );
 
+-- use helpdesk_db;
+-- show tables;
+-- select email,role from `USER`;
+
+-- use helpdesk_db;
+-- select user_id, name, email, role, created_at, password 
+-- from `USER`
+-- order by user_id desc;
 
 

@@ -62,7 +62,12 @@ public class LoginServlet extends HttpServlet {
         try {
             UserBean user = userService.validateUser(email.trim(), password.trim());
             if (user == null) {
-                request.setAttribute("errorMessage", "Invalid credentials. Please try again.");
+                UserBean existingUser = userService.getUserByEmail(email.trim());
+                if (existingUser == null) {
+                    request.setAttribute("errorMessage", "Account not found. Please create an account.");
+                } else {
+                    request.setAttribute("errorMessage", "Invalid credentials. Please try again.");
+                }
                 request.setAttribute("rememberedEmail", email);
                 request.setAttribute("rememberChecked", Boolean.valueOf(rememberEmail));
                 request.getRequestDispatcher("login.jsp").forward(request, response);
